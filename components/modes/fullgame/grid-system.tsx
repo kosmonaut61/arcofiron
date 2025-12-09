@@ -105,9 +105,10 @@ export function GridLabels() {
         return (
           <div
             key={`tick-${index}`}
-            className="absolute top-0 bottom-0 w-px bg-white/20"
+            className="absolute top-0 bottom-0 w-px bg-white/30"
             style={{
               left: `${tickLeft}px`,
+              mixBlendMode: "overlay",
             }}
           />
         )
