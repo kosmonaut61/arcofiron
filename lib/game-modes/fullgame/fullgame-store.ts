@@ -21,7 +21,7 @@ const EXTRACTOR_DEPLOY_TIME = 2000 // 2 seconds deployment animation
 const EXTRACTION_INTERVAL = 30000 // 30 seconds
 const EXTRACTION_AMOUNT = 5 // 5 units per extraction
 const EXTRACTOR_MAX_HEALTH = 25
-const MATERIAL_NODE_RADIUS = 24 // 2x tank size (tank is ~12px wide)
+const MATERIAL_NODE_RADIUS = 12 // Half size (was 24, tank is ~12px wide)
 const EXTRACTOR_PROXIMITY_RADIUS = 50 // How close extractor needs to be to node
 
 function generateTerrain(): number[] {
