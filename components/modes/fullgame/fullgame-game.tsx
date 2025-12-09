@@ -6,7 +6,6 @@ import { FullGameGameCanvas } from "./fullgame-game-canvas"
 import { FullGameBattleControls } from "./fullgame-battle-controls"
 import { ValueOverlay } from "@/components/value-overlay"
 import { BaseDrawer } from "@/components/base-drawer"
-import { GridLabels } from "./grid-system"
 
 export function FullGameGame() {
   const { phase, tanks } = useFullGameStore()
@@ -34,11 +33,6 @@ export function FullGameGame() {
           <div className="absolute inset-0">
             <FullGameGameCanvas />
             <ValueOverlay value={displayValue} label={overlayLabel} />
-          </div>
-          
-          {/* Grid labels and ticks - positioned above drawer, scrolls with canvas */}
-          <div className="absolute inset-0 pointer-events-none z-10">
-            <GridLabels />
           </div>
 
           {/* Base Drawer overlay */}

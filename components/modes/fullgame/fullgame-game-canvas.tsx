@@ -8,6 +8,7 @@ import {
 } from "@/lib/game-modes/fullgame/fullgame-store"
 import { getRandomGradientColors, generateGradientBands } from "@/lib/gradient-utils"
 import { FullGameWindHUD } from "./fullgame-wind-hud"
+import { GridLabels } from "./grid-system"
 import type { MaterialType } from "@/lib/game-types"
 
 const CANVAS_HEIGHT = 500
@@ -428,6 +429,7 @@ export function FullGameGameCanvas() {
             height={canvasHeight}
             style={{ width: TOTAL_WIDTH, height: "100%" }}
           />
+          {phase === "battle" && <GridLabels />}
         </div>
       </div>
       {phase === "battle" && <FullGameWindHUD />}
