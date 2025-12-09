@@ -1,12 +1,14 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { useGameStore } from "@/lib/game-store"
+import { useBaseGameStore } from "@/lib/base-game-store"
+import { useSkirmishStore } from "@/lib/game-modes/skirmish/skirmish-store"
 import { Button } from "@/components/ui/button"
 import { getRandomGradientColors, generateGradientBands } from "@/lib/gradient-utils"
+import { ModeSelector } from "@/components/mode-selector"
 
 export function MainMenu() {
-  const { initGame } = useGameStore()
+  const { gameMode, setGameMode, setPhase } = useBaseGameStore()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -36,6 +38,20 @@ export function MainMenu() {
     })
   }, [gradientColors])
 
+  const handleStartGame = () => {
+    if (!gameMode) return
+    
+    // Initialize the appropriate game mode
+    if (gameMode === "skirmish") {
+      useSkirmishStore.getState().initGame()
+      setPhase("buying")
+    }
+  }
+
+  const handleBack = () => {
+    setGameMode(null)
+  }
+
   return (
     <div ref={containerRef} className="relative flex flex-col items-center justify-center h-full gap-8 p-8">
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ imageRendering: "pixelated" }} />
@@ -49,15 +65,28 @@ export function MainMenu() {
 
           <div className="w-24 h-px bg-white/40" />
 
-          <div className="space-y-3 text-center text-xs text-white/70 max-w-[200px]">
-            <p>aim your cannon</p>
-            <p>adjust your power</p>
-            <p>destroy your enemy</p>
-          </div>
+          {!gameMode ? (
+            <>
+              <ModeSelector />
+            </>
+          ) : (
+            <>
+              <div className="space-y-3 text-center text-xs text-white/70 max-w-[200px]">
+                <p>aim your cannon</p>
+                <p>adjust your power</p>
+                <p>destroy your enemy</p>
+              </div>
 
-          <Button onClick={initGame} className="px-8 bg-white/20 hover:bg-white/30 text-white border border-white/30">
-            start game
-          </Button>
+              <div className="flex flex-col gap-2 w-full">
+                <Button onClick={handleStartGame} className="px-8 bg-white/20 hover:bg-white/30 text-white border border-white/30">
+                  start game
+                </Button>
+                <Button onClick={handleBack} variant="ghost" className="px-8 text-white/70 hover:text-white hover:bg-white/10">
+                  back
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
