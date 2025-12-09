@@ -185,10 +185,10 @@ export function FullGameGameCanvas() {
         const alpha = baseAlpha + Math.sin(pulsePhase + segmentOffset) * alphaVariation
         
         if (node.type === "oil") {
-          // Oil with subtle rainbow shift (much slower)
-          const rainbowColor = getRainbowColor(pulsePhase * 10 + seg * 2) // Slower color shift
+          // Oil with rainbow shimmer effect - more visible
+          const rainbowColor = getRainbowColor(pulsePhase * 20 + seg * 3) // Colorful rainbow effect
           ctx.fillStyle = rainbowColor
-          ctx.globalAlpha = alpha
+          ctx.globalAlpha = alpha + 0.1 // Slightly brighter for visibility
         } else {
           ctx.fillStyle = baseColor
           ctx.globalAlpha = alpha
