@@ -169,18 +169,24 @@ export function FullGameGameCanvas() {
       const baseColor = getMaterialColor(node.type)
 
       // Draw colored overlay on top of terrain for each segment
+      // Use a subtle, gentle pulse effect instead of distracting shimmer
+      const pulsePhase = (node.shimmerPhase * 0.3) % (Math.PI * 2) // Slower, smoother animation
+      const baseAlpha = 0.6
+      const alphaVariation = 0.08 // Much smaller variation for subtlety
+      const baseHeight = 4
+      
       for (let seg = 0; seg < node.segmentWidth; seg++) {
         const segX = nodeStartX + seg * SEGMENT_WIDTH
         const terrainIndex = Math.floor(segX)
         const terrainY = terrain[terrainIndex] ?? CANVAS_HEIGHT * 0.75
 
-        // Draw colored rectangle on top of terrain (like Napalm fire)
-        const alpha = 0.5 + Math.sin(node.shimmerPhase + seg * 0.5) * 0.2
+        // Subtle pulse effect - very gentle opacity change
+        const segmentOffset = seg * 0.1 // Small offset per segment for wave effect
+        const alpha = baseAlpha + Math.sin(pulsePhase + segmentOffset) * alphaVariation
         
         if (node.type === "oil") {
-          // Oil with rainbow shimmer effect
-          const rainbowColor = getRainbowColor(node.shimmerPhase + seg * 0.3)
-          // Use oklch with alpha via globalAlpha
+          // Oil with subtle rainbow shift (much slower)
+          const rainbowColor = getRainbowColor(pulsePhase * 10 + seg * 2) // Slower color shift
           ctx.fillStyle = rainbowColor
           ctx.globalAlpha = alpha
         } else {
@@ -188,9 +194,8 @@ export function FullGameGameCanvas() {
           ctx.globalAlpha = alpha
         }
         
-        // Draw rectangle on terrain surface with slight variation
-        const height = 3 + Math.sin(node.shimmerPhase + seg * 0.8) * 2
-        ctx.fillRect(segX, terrainY - height, SEGMENT_WIDTH, height)
+        // Consistent height with no variation
+        ctx.fillRect(segX, terrainY - baseHeight, SEGMENT_WIDTH, baseHeight)
         ctx.globalAlpha = 1.0
       }
     })

@@ -551,10 +551,10 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     const state = get()
     const now = Date.now()
 
-    // Update shimmer phase for animation
+    // Update shimmer phase for subtle animation (much slower for elegance)
     const updatedNodes = state.materialNodes.map((node) => ({
       ...node,
-      shimmerPhase: node.shimmerPhase + 0.05,
+      shimmerPhase: node.shimmerPhase + 0.01, // Slower animation for subtle pulse effect
     }))
 
     set({ materialNodes: updatedNodes })
