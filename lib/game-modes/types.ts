@@ -11,12 +11,12 @@ export const GAME_MODES: GameModeInfo[] = [
   {
     id: "fullgame",
     name: "Full Game",
-    description: "Complete campaign experience with progression and upgrades",
+    description: "Complete Campaign",
   },
   {
     id: "skirmish",
     name: "Skirmish",
-    description: "Classic quick battle - the original Arc of Iron experience",
+    description: "Quick Battle",
   },
   // Future modes can be added here
 ]
