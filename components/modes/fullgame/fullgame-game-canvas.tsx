@@ -159,52 +159,37 @@ export function FullGameGameCanvas() {
     ctx.closePath()
     ctx.fill()
 
-    // Draw material nodes
+    // Draw material nodes as colored ground segments (similar to Napalm fire)
+    const SEGMENT_WIDTH = CANVAS_WIDTH / 64 // Match grid system
     materialNodes.forEach((node) => {
-      const nodeX = node.x + SCROLL_PADDING
+      const nodeStartX = (node.segmentStart * SEGMENT_WIDTH) + SCROLL_PADDING
       const baseColor = getMaterialColor(node.type)
 
-      // Draw irregular smooth shape
-      ctx.save()
-      ctx.translate(nodeX, node.y)
-      ctx.beginPath()
+      // Draw colored overlay on top of terrain for each segment
+      for (let seg = 0; seg < node.segmentWidth; seg++) {
+        const segX = nodeStartX + seg * SEGMENT_WIDTH
+        const terrainIndex = Math.floor(segX)
+        const terrainY = terrain[terrainIndex] ?? CANVAS_HEIGHT * 0.75
 
-      // Create irregular but smooth shape
-      const points = 8
-      for (let i = 0; i < points; i++) {
-        const angle = (i / points) * Math.PI * 2
-        const radius = node.radius + Math.sin(angle * 2 + node.shimmerPhase) * 3
-        const x = Math.cos(angle) * radius
-        const y = Math.sin(angle) * radius
-
-        if (i === 0) {
-          ctx.moveTo(x, y)
+        // Draw colored rectangle on top of terrain (like Napalm fire)
+        const alpha = 0.5 + Math.sin(node.shimmerPhase + seg * 0.5) * 0.2
+        
+        if (node.type === "oil") {
+          // Oil with rainbow shimmer effect
+          const rainbowColor = getRainbowColor(node.shimmerPhase + seg * 0.3)
+          // Use oklch with alpha via globalAlpha
+          ctx.fillStyle = rainbowColor
+          ctx.globalAlpha = alpha
         } else {
-          ctx.lineTo(x, y)
+          ctx.fillStyle = baseColor
+          ctx.globalAlpha = alpha
         }
+        
+        // Draw rectangle on terrain surface with slight variation
+        const height = 3 + Math.sin(node.shimmerPhase + seg * 0.8) * 2
+        ctx.fillRect(segX, terrainY - height, SEGMENT_WIDTH, height)
+        ctx.globalAlpha = 1.0
       }
-      ctx.closePath()
-
-      // Fill with material color
-      if (node.type === "oil") {
-        // Oil with rainbow shimmer
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, node.radius)
-        gradient.addColorStop(0, getRainbowColor(node.shimmerPhase))
-        gradient.addColorStop(0.5, baseColor)
-        gradient.addColorStop(1, baseColor)
-        ctx.fillStyle = gradient
-      } else {
-        ctx.fillStyle = baseColor
-      }
-      ctx.fill()
-
-      // Shiny animation
-      ctx.globalAlpha = 0.6 + Math.sin(node.shimmerPhase * 2) * 0.2
-      ctx.fillStyle = "rgba(255, 255, 255, 0.5)"
-      ctx.fill()
-      ctx.globalAlpha = 1.0
-
-      ctx.restore()
     })
 
     // Draw extractors

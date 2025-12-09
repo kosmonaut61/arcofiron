@@ -91,10 +91,11 @@ export type MaterialType = "iron" | "copper" | "oil"
 
 export interface MaterialNode {
   id: string
-  x: number
-  y: number
+  x: number // Center X position
+  y: number // Terrain Y at center
   type: MaterialType
-  radius: number
+  segmentStart: number // Which grid segment this node starts at (0-63)
+  segmentWidth: number // How many segments wide (3-5)
   shimmerPhase: number // For animation
 }
 

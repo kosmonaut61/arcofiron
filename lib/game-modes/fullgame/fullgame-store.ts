@@ -21,8 +21,8 @@ const EXTRACTOR_DEPLOY_TIME = 2000 // 2 seconds deployment animation
 const EXTRACTION_INTERVAL = 30000 // 30 seconds
 const EXTRACTION_AMOUNT = 5 // 5 units per extraction
 const EXTRACTOR_MAX_HEALTH = 25
-const MATERIAL_NODE_RADIUS = 12 // Half size (was 24, tank is ~12px wide)
-const EXTRACTOR_PROXIMITY_RADIUS = 50 // How close extractor needs to be to node
+const EXTRACTOR_PROXIMITY_RADIUS = 50 // How close extractor needs to be to node center
+const SEGMENT_WIDTH = CANVAS_WIDTH / 64 // Grid segment width (matching grid-system.tsx)
 
 function generateTerrain(): number[] {
   const terrain: number[] = []
@@ -68,10 +68,18 @@ function generateMaterialNodes(terrain: number[]): MaterialNode[] {
     oil: 2 + Math.floor(Math.random() * 3),
   }
 
+  // Grid constants (matching grid-system.tsx)
+  const GRID_COLS = 8
+  const TOTAL_SEGMENTS = 64
+  const SEGMENT_WIDTH = CANVAS_WIDTH / TOTAL_SEGMENTS // 25 pixels per segment
+
   // Find top portion of terrain (top 30% of height range)
   const minHeight = Math.min(...terrain)
   const maxHeight = Math.max(...terrain)
   const topThreshold = minHeight + (maxHeight - minHeight) * 0.3
+
+  // Track used segments to avoid overlap
+  const usedSegments = new Set<number>()
 
   types.forEach((type) => {
     for (let i = 0; i < nodeCounts[type]; i++) {
@@ -79,27 +87,43 @@ function generateMaterialNodes(terrain: number[]): MaterialNode[] {
       let placed = false
 
       while (!placed && attempts < 50) {
-        const x = Math.random() * CANVAS_WIDTH
-        const terrainIndex = Math.floor(x + SCROLL_PADDING)
-        const terrainY = terrain[terrainIndex] ?? CANVAS_HEIGHT * 0.7
+        // Choose a random segment to start at (leave room for width)
+        const segmentWidth = 3 + Math.floor(Math.random() * 3) // 3-5 segments wide
+        const maxStartSegment = TOTAL_SEGMENTS - segmentWidth
+        const segmentStart = Math.floor(Math.random() * maxStartSegment)
 
-        // Place on top portion of terrain
-        if (terrainY <= topThreshold) {
-          const y = terrainY - MATERIAL_NODE_RADIUS - 5
-          const nodeId = `${type}-${i}-${Date.now()}`
+        // Check if any of these segments are already used
+        let segmentOverlap = false
+        for (let s = segmentStart; s < segmentStart + segmentWidth; s++) {
+          if (usedSegments.has(s)) {
+            segmentOverlap = true
+            break
+          }
+        }
 
-          // Check if too close to existing nodes
-          const tooClose = nodes.some(
-            (n) => Math.sqrt((n.x - x) ** 2 + (n.y - y) ** 2) < MATERIAL_NODE_RADIUS * 2.5,
-          )
+        if (!segmentOverlap) {
+          // Calculate center X position
+          const centerSegment = segmentStart + segmentWidth / 2
+          const x = centerSegment * SEGMENT_WIDTH
+          const terrainIndex = Math.floor(x + SCROLL_PADDING)
+          const terrainY = terrain[terrainIndex] ?? CANVAS_HEIGHT * 0.7
 
-          if (!tooClose) {
+          // Place on top portion of terrain
+          if (terrainY <= topThreshold) {
+            const nodeId = `${type}-${i}-${Date.now()}`
+
+            // Mark segments as used
+            for (let s = segmentStart; s < segmentStart + segmentWidth; s++) {
+              usedSegments.add(s)
+            }
+
             nodes.push({
               id: nodeId,
               x,
-              y,
+              y: terrainY,
               type,
-              radius: MATERIAL_NODE_RADIUS,
+              segmentStart,
+              segmentWidth,
               shimmerPhase: Math.random() * Math.PI * 2,
             })
             placed = true
