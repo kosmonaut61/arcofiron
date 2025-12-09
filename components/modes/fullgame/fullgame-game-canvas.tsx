@@ -7,14 +7,13 @@ import {
   TOTAL_WIDTH,
 } from "@/lib/game-modes/fullgame/fullgame-store"
 
-// Define constants locally to avoid import issues
-const CANVAS_WIDTH = 1600
-const CANVAS_HEIGHT = 500
 import { getRandomGradientColors, generateGradientBands } from "@/lib/gradient-utils"
 import { FullGameWindHUD } from "./fullgame-wind-hud"
 import { GridLabels } from "./grid-system"
 import type { MaterialType } from "@/lib/game-types"
 
+// Define constants locally to avoid import issues
+const CANVAS_WIDTH = 1600
 const CANVAS_HEIGHT = 500
 
 function getMaterialColor(type: MaterialType): string {

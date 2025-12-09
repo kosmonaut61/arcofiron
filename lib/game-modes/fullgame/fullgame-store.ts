@@ -12,15 +12,7 @@ import {
   type MaterialProjectile,
   type MaterialType,
 } from "@/lib/game-types"
-// Import constants from skirmish-store, but also define locally to avoid import issues
-import { 
-  CANVAS_WIDTH as SKIRMISH_CANVAS_WIDTH, 
-  CANVAS_HEIGHT as SKIRMISH_CANVAS_HEIGHT, 
-  SCROLL_PADDING as SKIRMISH_SCROLL_PADDING, 
-  TOTAL_WIDTH as SKIRMISH_TOTAL_WIDTH 
-} from "@/lib/game-modes/skirmish/skirmish-store"
-
-// Define constants locally (matching skirmish-store values)
+// Define constants locally (matching skirmish-store values to avoid import issues)
 const CANVAS_WIDTH = 1600
 const CANVAS_HEIGHT = 500
 const SCROLL_PADDING = 200
