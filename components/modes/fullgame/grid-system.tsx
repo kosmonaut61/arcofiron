@@ -5,7 +5,8 @@ import { CANVAS_WIDTH, SCROLL_PADDING, TOTAL_WIDTH } from "@/lib/game-modes/full
 
 const GRID_ROWS = 8 // A-H
 const GRID_COLS = 16 // 1-16
-const SEGMENT_WIDTH = CANVAS_WIDTH / GRID_COLS // 100 pixels per segment
+const TOTAL_SEGMENTS = GRID_ROWS * GRID_COLS // 128 segments total
+const SEGMENT_WIDTH = CANVAS_WIDTH / TOTAL_SEGMENTS // 1600 / 128 = 12.5 pixels per segment
 
 export function getGridLabel(x: number): string {
   // Convert game X coordinate to grid label
@@ -94,28 +95,44 @@ export function GridLabels() {
     <div
       ref={gridRef}
       className="absolute bottom-[200px] left-0 right-0 z-20 pointer-events-none"
-      style={{ height: "24px" }}
+      style={{ height: "20px" }}
     >
-      <div className="h-full bg-background/90 backdrop-blur-sm border-b border-border">
+      <div className="h-full bg-background/60 backdrop-blur-sm">
         <div
           ref={scrollContainerRef}
           className="w-full h-full overflow-x-auto overflow-y-hidden scrollbar-hide"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          <div className="relative h-full" style={{ width: TOTAL_WIDTH }}>
+          <div className="relative h-full flex items-center" style={{ width: TOTAL_WIDTH }}>
             {segments.map((label, index) => {
               const left = index * SEGMENT_WIDTH + SCROLL_PADDING
+              const isLast = index === segments.length - 1
+              const tickLeft = left + SEGMENT_WIDTH
               return (
                 <div
                   key={label}
-                  className="absolute h-full flex items-center justify-center border-r border-border/30"
+                  className="absolute h-full flex items-center justify-center"
                   style={{
                     left: `${left}px`,
                     width: `${SEGMENT_WIDTH}px`,
                   }}
                 >
-                  <span className="text-[10px] text-muted-foreground font-mono select-none">{label}</span>
+                  <span className="text-[9px] text-white/50 font-mono select-none">{label}</span>
                 </div>
+              )
+            })}
+            {/* Ticks between segments */}
+            {segments.map((_, index) => {
+              if (index === segments.length - 1) return null
+              const tickLeft = (index + 1) * SEGMENT_WIDTH + SCROLL_PADDING
+              return (
+                <div
+                  key={`tick-${index}`}
+                  className="absolute top-0 bottom-0 w-px bg-white/15"
+                  style={{
+                    left: `${tickLeft}px`,
+                  }}
+                />
               )
             })}
           </div>
