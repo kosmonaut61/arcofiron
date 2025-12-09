@@ -3,6 +3,7 @@
 import { useBaseGameStore } from "@/lib/base-game-store"
 import { MainMenu } from "@/components/main-menu"
 import { SkirmishGame } from "@/components/modes/skirmish/skirmish-game"
+import { FullGameGame } from "@/components/modes/fullgame/fullgame-game"
 
 export default function IronArc() {
   const { phase, gameMode } = useBaseGameStore()
@@ -12,6 +13,7 @@ export default function IronArc() {
       {phase === "menu" && <MainMenu />}
 
       {phase !== "menu" && gameMode === "skirmish" && <SkirmishGame />}
+      {phase !== "menu" && gameMode === "fullgame" && <FullGameGame />}
     </div>
   )
 }

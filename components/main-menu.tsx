@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useBaseGameStore } from "@/lib/base-game-store"
 import { useSkirmishStore } from "@/lib/game-modes/skirmish/skirmish-store"
+import { useFullGameStore } from "@/lib/game-modes/fullgame/fullgame-store"
 import { Button } from "@/components/ui/button"
 import { getRandomGradientColors, generateGradientBands } from "@/lib/gradient-utils"
 import { ModeSelector } from "@/components/mode-selector"
@@ -44,6 +45,9 @@ export function MainMenu() {
     // Initialize the appropriate game mode
     if (gameMode === "skirmish") {
       useSkirmishStore.getState().initGame()
+      setPhase("buying")
+    } else if (gameMode === "fullgame") {
+      useFullGameStore.getState().initGame()
       setPhase("buying")
     }
   }

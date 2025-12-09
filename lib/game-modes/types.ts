@@ -1,4 +1,4 @@
-export type GameMode = "skirmish" | "campaign" | "multiplayer" // Add more modes as needed
+export type GameMode = "fullgame" | "skirmish" | "campaign" | "multiplayer" // Add more modes as needed
 
 export interface GameModeInfo {
   id: GameMode
@@ -8,6 +8,11 @@ export interface GameModeInfo {
 }
 
 export const GAME_MODES: GameModeInfo[] = [
+  {
+    id: "fullgame",
+    name: "Full Game",
+    description: "Complete campaign experience with progression and upgrades",
+  },
   {
     id: "skirmish",
     name: "Skirmish",
