@@ -34,6 +34,13 @@ export function FullGameGameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  
+  // Expose scroll container for grid sync
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      ;(scrollContainerRef.current as any).dataset.gridSync = "true"
+    }
+  }, [])
   const animationRef = useRef<number>(0)
   const hasScheduledNextTurn = useRef(false)
   const hasInitialScrolled = useRef(false)
