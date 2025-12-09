@@ -162,42 +162,66 @@ export function FullGameGameCanvas() {
     ctx.closePath()
     ctx.fill()
 
-    // Draw material nodes as colored ground segments (similar to Napalm fire)
+    // Draw material nodes with stroke and radial gradient (refined look)
     const SEGMENT_WIDTH = CANVAS_WIDTH / 64 // Match grid system
     materialNodes.forEach((node) => {
       const nodeStartX = (node.segmentStart * SEGMENT_WIDTH) + SCROLL_PADDING
-      const baseColor = getMaterialColor(node.type)
-
-      // Draw colored overlay on top of terrain for each segment
-      // Use a subtle, gentle pulse effect instead of distracting shimmer
-      const pulsePhase = (node.shimmerPhase * 0.3) % (Math.PI * 2) // Slower, smoother animation
-      const baseAlpha = 0.6
-      const alphaVariation = 0.08 // Much smaller variation for subtlety
-      const baseHeight = 4
+      const nodeWidth = node.segmentWidth * SEGMENT_WIDTH
+      const nodeCenterX = nodeStartX + nodeWidth / 2
       
-      for (let seg = 0; seg < node.segmentWidth; seg++) {
-        const segX = nodeStartX + seg * SEGMENT_WIDTH
-        const terrainIndex = Math.floor(segX)
-        const terrainY = terrain[terrainIndex] ?? CANVAS_HEIGHT * 0.75
-
-        // Subtle pulse effect - very gentle opacity change
-        const segmentOffset = seg * 0.1 // Small offset per segment for wave effect
-        const alpha = baseAlpha + Math.sin(pulsePhase + segmentOffset) * alphaVariation
-        
-        if (node.type === "oil") {
-          // Oil with rainbow shimmer effect - more visible
-          const rainbowColor = getRainbowColor(pulsePhase * 20 + seg * 3) // Colorful rainbow effect
-          ctx.fillStyle = rainbowColor
-          ctx.globalAlpha = alpha + 0.1 // Slightly brighter for visibility
-        } else {
-          ctx.fillStyle = baseColor
-          ctx.globalAlpha = alpha
-        }
-        
-        // Consistent height with no variation
-        ctx.fillRect(segX, terrainY - baseHeight, SEGMENT_WIDTH, baseHeight)
-        ctx.globalAlpha = 1.0
+      // Find the terrain height at the center and edges of the node
+      const centerTerrainIndex = Math.floor(nodeCenterX)
+      const centerTerrainY = terrain[centerTerrainIndex] ?? CANVAS_HEIGHT * 0.75
+      
+      const baseColor = getMaterialColor(node.type)
+      const pulsePhase = (node.shimmerPhase * 0.3) % (Math.PI * 2)
+      const nodeHeight = 6
+      
+      // Create radial gradient centered on the node, following terrain
+      const gradientRadius = Math.max(nodeWidth * 0.8, 40)
+      const gradientCenterY = centerTerrainY - nodeHeight / 2
+      const gradient = ctx.createRadialGradient(
+        nodeCenterX,
+        gradientCenterY,
+        0,
+        nodeCenterX,
+        gradientCenterY,
+        gradientRadius
+      )
+      
+      if (node.type === "oil") {
+        // Oil with rainbow gradient
+        const rainbowColor1 = getRainbowColor(pulsePhase * 20)
+        const rainbowColor2 = getRainbowColor(pulsePhase * 20 + 60)
+        gradient.addColorStop(0, rainbowColor1)
+        gradient.addColorStop(0.5, rainbowColor2)
+        gradient.addColorStop(0.8, `oklch(0.50 0.10 0 / 0.4)`)
+        gradient.addColorStop(1, `oklch(0.40 0.05 0 / 0.1)`)
+      } else {
+        // Iron and copper with radial gradient - brighter in center, fades at edges
+        const lighterColor = node.type === "iron" 
+          ? "oklch(0.70 0.18 220)" 
+          : "oklch(0.75 0.22 60)"
+        gradient.addColorStop(0, lighterColor)
+        gradient.addColorStop(0.4, baseColor)
+        gradient.addColorStop(0.8, `${baseColor} / 0.5`)
+        gradient.addColorStop(1, `${baseColor} / 0.1`)
       }
+      
+      // Draw the gradient fill on terrain surface
+      ctx.fillStyle = gradient
+      ctx.globalAlpha = 0.85
+      ctx.fillRect(nodeStartX - gradientRadius * 0.3, centerTerrainY - nodeHeight, nodeWidth + gradientRadius * 0.6, nodeHeight)
+      
+      // Draw stroke outline matching the node width
+      ctx.strokeStyle = baseColor
+      ctx.lineWidth = 2
+      ctx.globalAlpha = 1.0
+      ctx.beginPath()
+      ctx.rect(nodeStartX, centerTerrainY - nodeHeight, nodeWidth, nodeHeight)
+      ctx.stroke()
+      
+      ctx.globalAlpha = 1.0
     })
 
     // Draw extractors
