@@ -209,23 +209,25 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>health: {currentTank.health}%</span>
         </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">iron:</span>
-          <span className="font-semibold text-base" style={{ color: "oklch(0.65 0.15 220)" }}>
-            {inventory.iron}
-          </span>
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">copper:</span>
-          <span className="font-semibold text-base" style={{ color: "oklch(0.70 0.20 60)" }}>
-            {inventory.copper}
-          </span>
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">oil:</span>
-          <span className="font-semibold text-base" style={{ color: "oklch(0.50 0.10 0)" }}>
-            {inventory.oil}
-          </span>
+        <div className="flex justify-between items-center gap-4 text-sm">
+          <div className="flex items-center gap-1">
+            <span className="text-muted-foreground">iron:</span>
+            <span className="font-semibold text-base" style={{ color: "oklch(0.65 0.15 220)" }}>
+              {inventory.iron}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-muted-foreground">copper:</span>
+            <span className="font-semibold text-base" style={{ color: "oklch(0.70 0.20 60)" }}>
+              {inventory.copper}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-muted-foreground">oil:</span>
+            <span className="font-semibold text-base" style={{ color: "oklch(0.50 0.10 0)" }}>
+              {inventory.oil}
+            </span>
+          </div>
         </div>
       </div>
     </div>
