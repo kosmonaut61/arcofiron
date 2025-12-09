@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { CANVAS_WIDTH, SCROLL_PADDING, TOTAL_WIDTH } from "@/lib/game-modes/fullgame/fullgame-store"
+import { SCROLL_PADDING, TOTAL_WIDTH } from "@/lib/game-modes/fullgame/fullgame-store"
 
+// Define constants locally to avoid import issues
+const CANVAS_WIDTH = 1600 // Match fullgame-store value
 const GRID_ROWS = 8 // A-H
 const GRID_COLS = 8 // 1-8
 const TOTAL_SEGMENTS = GRID_ROWS * GRID_COLS // 64 segments total
