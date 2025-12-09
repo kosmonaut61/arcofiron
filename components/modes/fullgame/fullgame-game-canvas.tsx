@@ -104,8 +104,7 @@ export function FullGameGameCanvas() {
       const container = containerRef.current
       if (container) {
         const rect = container.getBoundingClientRect()
-        // Reserve 20px at bottom for grid labels
-        setCanvasHeight(Math.floor(rect.height - 20))
+        setCanvasHeight(Math.floor(rect.height))
       }
     }
 
@@ -428,10 +427,10 @@ export function FullGameGameCanvas() {
             ref={canvasRef}
             width={TOTAL_WIDTH}
             height={canvasHeight}
-            style={{ width: TOTAL_WIDTH, height: `${canvasHeight}px` }}
+            style={{ width: TOTAL_WIDTH, height: "100%" }}
           />
           {phase === "battle" && (
-            <div className="absolute left-0 right-0 z-30 pointer-events-none" style={{ bottom: "0px", height: "20px" }}>
+            <div className="absolute left-0 right-0 z-30 pointer-events-none" style={{ bottom: "200px", height: "20px" }}>
               <GridLabels />
             </div>
           )}
