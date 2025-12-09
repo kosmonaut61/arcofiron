@@ -18,14 +18,14 @@ export function ModeSelector() {
         <p className="text-sm text-white/80 tracking-wide">select game mode</p>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 w-full">
         {GAME_MODES.map((mode) => (
           <Button
             key={mode.id}
             onClick={() => handleSelectMode(mode.id)}
-            className="w-full justify-start px-4 py-3 h-auto bg-white/10 hover:bg-white/20 text-white border border-white/20"
+            className="w-full justify-start px-8 py-3 h-auto bg-white/10 hover:bg-white/20 text-white border border-white/20"
           >
-            <div className="flex flex-col items-start gap-1">
+            <div className="flex flex-col items-start gap-1 w-full">
               <span className="text-sm font-medium">{mode.name}</span>
               <span className="text-xs text-white/70 text-left">{mode.description}</span>
             </div>
