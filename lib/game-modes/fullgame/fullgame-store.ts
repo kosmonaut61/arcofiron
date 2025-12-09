@@ -448,23 +448,46 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
 
   updateMaterialProjectiles: () => {
     const state = get()
+    const playerTank = state.tanks.find((t) => t.id === "player")
+    if (!playerTank) {
+      set({ materialProjectiles: [] })
+      return
+    }
+
     const gravity = 0.1
     const stillActive: MaterialProjectile[] = []
 
     state.materialProjectiles.forEach((proj) => {
       if (!proj.active) return
 
-      const newX = proj.x + proj.vx
-      const newY = proj.y + proj.vy
-      const newVy = proj.vy + gravity
+      // Update target position in case tank moved
+      const currentTargetX = playerTank.x
+      const currentTargetY = playerTank.y
+
+      // Recalculate velocity to always aim at base (homing behavior)
+      const dx = currentTargetX - proj.x
+      const dy = currentTargetY - proj.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      const speed = 3
+
+      // Only recalculate if not too close (to avoid jitter)
+      let vx = proj.vx
+      let vy = proj.vy
+      if (distance > 30) {
+        vx = (dx / distance) * speed
+        vy = (dy / distance) * speed
+      }
+
+      const newX = proj.x + vx
+      const newY = proj.y + vy
 
       // Add to trail
       proj.trail.push({ x: proj.x, y: proj.y })
       if (proj.trail.length > 20) proj.trail.shift()
 
-      // Check if reached base
-      const distToBase = Math.sqrt((proj.x - proj.targetX) ** 2 + (proj.y - proj.targetY) ** 2)
-      if (distToBase < 20) {
+      // Check if reached base (use updated position)
+      const distToBase = Math.sqrt((newX - currentTargetX) ** 2 + (newY - currentTargetY) ** 2)
+      if (distToBase < 30) {
         // Add to inventory
         set((s) => ({
           inventory: {
@@ -479,7 +502,7 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       const leftBound = -SCROLL_PADDING
       const rightBound = CANVAS_WIDTH + SCROLL_PADDING
 
-      if (newX < leftBound || newX >= rightBound || newY > CANVAS_HEIGHT) {
+      if (newX < leftBound || newX >= rightBound || newY > CANVAS_HEIGHT || newY < 0) {
         return // Out of bounds, don't add to stillActive
       }
 
@@ -487,7 +510,10 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
         ...proj,
         x: newX,
         y: newY,
-        vy: newVy,
+        vx,
+        vy,
+        targetX: currentTargetX,
+        targetY: currentTargetY,
       })
     })
 
