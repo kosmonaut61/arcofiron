@@ -24,14 +24,14 @@ export function BaseDrawer({ children, contentHeight = 200 }: BaseDrawerProps) {
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm rounded-t-2xl border-t border-border shadow-lg transition-[height] duration-200 ease-out"
+      className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-md rounded-t-2xl border-t border-white/10 shadow-2xl transition-[height] duration-200 ease-out"
       style={{ height: currentHeight }}
     >
-      <button onClick={handleToggle} className="flex items-center justify-center w-full h-8 cursor-pointer">
+      <button onClick={handleToggle} className="flex items-center justify-center w-full h-8 cursor-pointer hover:bg-white/5 transition-colors">
         {isOpen ? (
-          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+          <ChevronDown className="h-5 w-5 text-white/70" />
         ) : (
-          <ChevronUp className="h-5 w-5 text-muted-foreground" />
+          <ChevronUp className="h-5 w-5 text-white/70" />
         )}
       </button>
 

@@ -68,25 +68,25 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
             onValueChange={(value) => updateTank(currentTank.id, { currentWeapon: Number.parseInt(value) })}
             disabled={!canFire}
           >
-            <SelectTrigger className="w-full h-8 text-sm">
+            <SelectTrigger className="w-full h-8 text-sm bg-white/10 border-white/20 text-white hover:bg-white/20">
               <SelectValue>
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 text-white">
                   <span>{currentWeapon.icon}</span>
                   <span className="truncate">{currentWeapon.name}</span>
                 </span>
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-black/60 backdrop-blur-md border-white/20 text-white">
               {/* Extractors at top */}
               {extractorsGroup.length > 0 && (
                 <SelectGroup>
-                  <SelectLabel className="text-xs uppercase tracking-widest">Extractors</SelectLabel>
+                  <SelectLabel className="text-xs uppercase tracking-widest text-white/70">Extractors</SelectLabel>
                   {extractorsGroup.map(({ weapon, index }) => (
-                    <SelectItem key={weapon.id} value={index.toString()} className="flex items-center gap-2">
+                    <SelectItem key={weapon.id} value={index.toString()} className="flex items-center gap-2 text-white focus:bg-white/20">
                       <span className="flex items-center gap-2 w-full">
                         <span>{weapon.icon}</span>
                         <span className="flex-1">{weapon.name}</span>
-                        <span className="text-xs text-muted-foreground">∞</span>
+                        <span className="text-xs text-white/60">∞</span>
                       </span>
                     </SelectItem>
                   ))}
@@ -99,7 +99,7 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
                 if (!weapons || weapons.length === 0) return null
                 return (
                   <SelectGroup key={category}>
-                    <SelectLabel className="text-xs uppercase tracking-widest">{categoryLabels[category]}</SelectLabel>
+                    <SelectLabel className="text-xs uppercase tracking-widest text-white/70">{categoryLabels[category]}</SelectLabel>
                     {weapons.map(({ weapon, index }) => {
                       const isDisabled = weapon.quantity <= 0 && weapon.price > 0
                       return (
@@ -107,12 +107,12 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
                           key={weapon.id}
                           value={index.toString()}
                           disabled={isDisabled}
-                          className="flex items-center gap-2"
+                          className="flex items-center gap-2 text-white focus:bg-white/20"
                         >
                           <span className="flex items-center gap-2 w-full">
                             <span>{weapon.icon}</span>
                             <span className="flex-1">{weapon.name}</span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-white/60">
                               ×{weapon.quantity === 99 ? "∞" : weapon.quantity}
                             </span>
                           </span>
@@ -125,7 +125,7 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
             </SelectContent>
           </Select>
         </div>
-        <span className="text-xs text-muted-foreground whitespace-nowrap">
+        <span className="text-xs text-white/70 whitespace-nowrap">
           ×{currentWeapon.quantity === 99 ? "∞" : currentWeapon.quantity}
         </span>
       </div>
@@ -137,7 +137,7 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0"
+            className="h-8 w-8 shrink-0 text-white/70 hover:text-white hover:bg-white/10"
             onClick={() => updateTank(currentTank.id, { angle: Math.max(0, currentTank.angle - 1) })}
             disabled={!canFire || currentTank.angle <= 0}
           >
@@ -157,7 +157,7 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0"
+            className="h-8 w-8 shrink-0 text-white/70 hover:text-white hover:bg-white/10"
             onClick={() => updateTank(currentTank.id, { angle: Math.min(180, currentTank.angle + 1) })}
             disabled={!canFire || currentTank.angle >= 180}
           >
@@ -170,7 +170,7 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0"
+            className="h-8 w-8 shrink-0 text-white/70 hover:text-white hover:bg-white/10"
             onClick={() => updateTank(currentTank.id, { power: Math.max(10, currentTank.power - 1) })}
             disabled={!canFire || currentTank.power <= 10}
           >
@@ -190,7 +190,7 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0"
+            className="h-8 w-8 shrink-0 text-white/70 hover:text-white hover:bg-white/10"
             onClick={() => updateTank(currentTank.id, { power: Math.min(100, currentTank.power + 1) })}
             disabled={!canFire || currentTank.power >= 100}
           >
@@ -200,28 +200,28 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
       </div>
 
       {/* Fire button */}
-      <Button onClick={fireProjectile} disabled={!canFire} className="w-full h-9">
+      <Button onClick={fireProjectile} disabled={!canFire} className="w-full h-9 bg-white/20 hover:bg-white/30 text-white border border-white/30">
         {isProcessingShot ? "firing..." : "fire"}
       </Button>
 
       {/* Status bar */}
-      <div className="flex justify-between items-center gap-3 pt-2 border-t border-border text-xs">
-        <span className="text-muted-foreground">health: {currentTank.health}%</span>
+      <div className="flex justify-between items-center gap-3 pt-2 border-t border-white/10 text-xs">
+        <span className="text-white/70">health: {currentTank.health}%</span>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
-            <span className="text-muted-foreground">iron:</span>
+            <span className="text-white/70">iron:</span>
             <span className="font-semibold" style={{ color: "oklch(0.65 0.15 220)" }}>
               {inventory.iron}
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-muted-foreground">copper:</span>
+            <span className="text-white/70">copper:</span>
             <span className="font-semibold" style={{ color: "oklch(0.70 0.20 60)" }}>
               {inventory.copper}
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-muted-foreground">oil:</span>
+            <span className="text-white/70">oil:</span>
             <span className="font-semibold" style={{ color: "oklch(0.50 0.10 0)" }}>
               {inventory.oil}
             </span>

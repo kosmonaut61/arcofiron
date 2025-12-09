@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import { CANVAS_WIDTH, SCROLL_PADDING, TOTAL_WIDTH } from "@/lib/game-modes/fullgame/fullgame-store"
 
 const GRID_ROWS = 8 // A-H
@@ -34,9 +35,11 @@ export function getGridSegmentBounds(segmentLabel: string): { minX: number; maxX
 }
 
 export function GridLabels() {
+  const gridRef = useRef<HTMLDivElement>(null)
+  const [drawerHeight, setDrawerHeight] = useState(232) // Default: 200 content + 32 handle
   const segments: string[] = []
   
-  // Generate all segment labels A1-H8
+  // Generate all segment labels A1-H8 (for calculating tick positions)
   for (let row = 0; row < GRID_ROWS; row++) {
     const rowLetter = String.fromCharCode(65 + row) // A-H
     for (let col = 1; col <= GRID_COLS; col++) {
@@ -44,8 +47,57 @@ export function GridLabels() {
     }
   }
 
+  // Observe drawer height changes
+  useEffect(() => {
+    const findDrawer = (): HTMLElement | null => {
+      // Find the BaseDrawer element by looking for the element with the drawer styling
+      const drawers = document.querySelectorAll('[class*="rounded-t-2xl"][class*="border-t"]')
+      for (const drawer of drawers) {
+        if (drawer instanceof HTMLElement && drawer.style.height) {
+          return drawer
+        }
+      }
+      return null
+    }
+
+    const updateDrawerHeight = () => {
+      const drawer = findDrawer()
+      if (drawer) {
+        const height = drawer.offsetHeight
+        setDrawerHeight(height)
+      }
+    }
+
+    // Initial check
+    const timeout = setTimeout(updateDrawerHeight, 100)
+
+    // Watch for drawer changes using ResizeObserver
+    const drawer = findDrawer()
+    if (drawer) {
+      const resizeObserver = new ResizeObserver(() => {
+        updateDrawerHeight()
+      })
+      resizeObserver.observe(drawer)
+
+      // Also listen for transition end in case ResizeObserver doesn't catch it
+      drawer.addEventListener('transitionend', updateDrawerHeight)
+
+      return () => {
+        resizeObserver.disconnect()
+        drawer.removeEventListener('transitionend', updateDrawerHeight)
+        clearTimeout(timeout)
+      }
+    }
+
+    return () => clearTimeout(timeout)
+  }, [])
+
   return (
-    <div className="absolute inset-0 pointer-events-none" style={{ bottom: "200px" }}>
+    <div 
+      ref={gridRef}
+      className="absolute inset-0 pointer-events-none" 
+      style={{ bottom: `${drawerHeight}px` }}
+    >
       {/* Full-height vertical ticks across battle view */}
       {segments.map((_, index) => {
         if (index === segments.length - 1) return null
@@ -60,29 +112,6 @@ export function GridLabels() {
           />
         )
       })}
-
-      {/* Labels at bottom */}
-      <div className="absolute bottom-0 left-0" style={{ height: "20px", width: TOTAL_WIDTH }}>
-        <div className="h-full bg-black/40 backdrop-blur-sm">
-          <div className="relative h-full flex items-center" style={{ width: TOTAL_WIDTH }}>
-            {segments.map((label, index) => {
-              const left = index * SEGMENT_WIDTH + SCROLL_PADDING
-              return (
-                <div
-                  key={label}
-                  className="absolute h-full flex items-center justify-center"
-                  style={{
-                    left: `${left}px`,
-                    width: `${SEGMENT_WIDTH}px`,
-                  }}
-                >
-                  <span className="text-[10px] text-white/70 font-mono select-none">{label}</span>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
