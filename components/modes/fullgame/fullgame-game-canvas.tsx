@@ -195,8 +195,8 @@ export function FullGameGameCanvas() {
         const rainbowColor2 = getRainbowColor(pulsePhase * 20 + 60)
         gradient.addColorStop(0, rainbowColor1)
         gradient.addColorStop(0.5, rainbowColor2)
-        gradient.addColorStop(0.8, `oklch(0.50 0.10 0 / 0.4)`)
-        gradient.addColorStop(1, `oklch(0.40 0.05 0 / 0.1)`)
+        gradient.addColorStop(0.8, "rgba(128, 128, 128, 0.4)") // Grey with opacity
+        gradient.addColorStop(1, "rgba(102, 102, 102, 0.1)") // Dark grey with opacity
       } else {
         // Iron and copper with radial gradient - brighter in center, fades at edges
         const lighterColor = node.type === "iron" 
@@ -204,8 +204,14 @@ export function FullGameGameCanvas() {
           : "oklch(0.75 0.22 60)"
         gradient.addColorStop(0, lighterColor)
         gradient.addColorStop(0.4, baseColor)
-        gradient.addColorStop(0.8, `${baseColor} / 0.5`)
-        gradient.addColorStop(1, `${baseColor} / 0.1`)
+        // Use rgba for opacity - approximate the base color
+        if (node.type === "iron") {
+          gradient.addColorStop(0.8, "rgba(100, 150, 200, 0.5)") // Light blue with opacity
+          gradient.addColorStop(1, "rgba(100, 150, 200, 0.1)")
+        } else {
+          gradient.addColorStop(0.8, "rgba(220, 180, 100, 0.5)") // Mustard with opacity
+          gradient.addColorStop(1, "rgba(220, 180, 100, 0.1)")
+        }
       }
       
       // Draw the gradient fill on terrain surface
