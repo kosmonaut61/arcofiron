@@ -13,7 +13,7 @@ export function ModeSelector() {
   }
 
   return (
-    <div className="flex flex-col gap-3 w-full">
+    <div className="flex flex-col gap-3 w-full max-w-[200px]">
       <div className="text-center space-y-1">
         <p className="text-sm text-white/80 tracking-wide">select game mode</p>
       </div>

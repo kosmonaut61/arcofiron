@@ -81,7 +81,7 @@ export function MainMenu() {
                 <p>destroy your enemy</p>
               </div>
 
-              <div className="flex flex-col gap-2 w-full">
+              <div className="flex flex-col gap-2 w-full max-w-[200px]">
                 <Button onClick={handleStartGame} className="px-8 bg-white/20 hover:bg-white/30 text-white border border-white/30">
                   start game
                 </Button>
