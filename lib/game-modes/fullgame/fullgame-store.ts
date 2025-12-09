@@ -90,24 +90,15 @@ function generateMaterialNodes(terrain: number[]): MaterialNode[] {
       let placed = false
 
       while (!placed && attempts < 50) {
-        // Choose a random segment to start at (leave room for width)
-        const segmentWidth = 3 + Math.floor(Math.random() * 3) // 3-5 segments wide
+        // Each node spans exactly 1 grid segment
+        const segmentWidth = 1
         const maxStartSegment = TOTAL_SEGMENTS - segmentWidth
         const segmentStart = Math.floor(Math.random() * maxStartSegment)
 
-        // Check if any of these segments are already used
-        let segmentOverlap = false
-        for (let s = segmentStart; s < segmentStart + segmentWidth; s++) {
-          if (usedSegments.has(s)) {
-            segmentOverlap = true
-            break
-          }
-        }
-
-        if (!segmentOverlap) {
-          // Calculate center X position
-          const centerSegment = segmentStart + segmentWidth / 2
-          const x = centerSegment * SEGMENT_WIDTH
+        // Check if this segment is already used
+        if (!usedSegments.has(segmentStart)) {
+          // Calculate center X position (center of the single segment)
+          const x = (segmentStart + 0.5) * SEGMENT_WIDTH
           const terrainIndex = Math.floor(x + SCROLL_PADDING)
           const terrainY = terrain[terrainIndex] ?? CANVAS_HEIGHT * 0.7
 
@@ -115,10 +106,8 @@ function generateMaterialNodes(terrain: number[]): MaterialNode[] {
           if (terrainY <= topThreshold) {
             const nodeId = `${type}-${i}-${Date.now()}`
 
-            // Mark segments as used
-            for (let s = segmentStart; s < segmentStart + segmentWidth; s++) {
-              usedSegments.add(s)
-            }
+            // Mark segment as used
+            usedSegments.add(segmentStart)
 
             nodes.push({
               id: nodeId,

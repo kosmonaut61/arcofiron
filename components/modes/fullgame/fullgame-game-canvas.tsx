@@ -23,7 +23,7 @@ function getMaterialColor(type: MaterialType): string {
     case "copper":
       return "oklch(0.70 0.20 60)" // Mustard yellow-orange
     case "oil":
-      return "oklch(0.40 0.05 0)" // Grey
+      return "oklch(0.70 0.25 350)" // Bright pink
     default:
       return "#ffffff"
   }
@@ -190,13 +190,13 @@ export function FullGameGameCanvas() {
       )
       
       if (node.type === "oil") {
-        // Oil with rainbow gradient
-        const rainbowColor1 = getRainbowColor(pulsePhase * 20)
-        const rainbowColor2 = getRainbowColor(pulsePhase * 20 + 60)
-        gradient.addColorStop(0, rainbowColor1)
-        gradient.addColorStop(0.5, rainbowColor2)
-        gradient.addColorStop(0.8, "rgba(128, 128, 128, 0.4)") // Grey with opacity
-        gradient.addColorStop(1, "rgba(102, 102, 102, 0.1)") // Dark grey with opacity
+        // Oil with bright pink gradient
+        const pinkColor = "oklch(0.70 0.25 350)" // Bright pink
+        const lighterPink = "oklch(0.75 0.30 350)" // Even brighter pink
+        gradient.addColorStop(0, lighterPink)
+        gradient.addColorStop(0.4, pinkColor)
+        gradient.addColorStop(0.8, "rgba(255, 100, 200, 0.5)") // Pink with opacity
+        gradient.addColorStop(1, "rgba(255, 100, 200, 0.1)") // Light pink with opacity
       } else {
         // Iron and copper with radial gradient - brighter in center, fades at edges
         const lighterColor = node.type === "iron" 
