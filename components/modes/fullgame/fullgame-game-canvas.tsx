@@ -431,7 +431,7 @@ export function FullGameGameCanvas() {
             style={{ width: TOTAL_WIDTH, height: `${canvasHeight}px` }}
           />
           {phase === "battle" && (
-            <div className="absolute bottom-0 left-0 right-0 z-10" style={{ height: "20px" }}>
+            <div className="absolute left-0 right-0 z-30 pointer-events-none" style={{ bottom: "0px", height: "20px" }}>
               <GridLabels />
             </div>
           )}

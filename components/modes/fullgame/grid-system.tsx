@@ -46,7 +46,7 @@ export function GridLabels() {
 
   return (
     <div className="relative w-full h-full pointer-events-none">
-      <div className="h-full bg-background/60 backdrop-blur-sm">
+      <div className="h-full bg-black/40 backdrop-blur-sm">
         <div className="relative h-full flex items-center" style={{ width: TOTAL_WIDTH }}>
           {segments.map((label, index) => {
             const left = index * SEGMENT_WIDTH + SCROLL_PADDING
@@ -59,7 +59,7 @@ export function GridLabels() {
                   width: `${SEGMENT_WIDTH}px`,
                 }}
               >
-                <span className="text-[9px] text-white/50 font-mono select-none">{label}</span>
+                <span className="text-[10px] text-white/80 font-mono select-none font-medium">{label}</span>
               </div>
             )
           })}
@@ -70,7 +70,7 @@ export function GridLabels() {
             return (
               <div
                 key={`tick-${index}`}
-                className="absolute top-0 bottom-0 w-px bg-white/15"
+                className="absolute top-0 bottom-0 w-px bg-white/25"
                 style={{
                   left: `${tickLeft}px`,
                 }}
