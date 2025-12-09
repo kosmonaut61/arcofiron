@@ -35,7 +35,11 @@ export function FullGameGame() {
             <FullGameGameCanvas />
             <ValueOverlay value={displayValue} label={overlayLabel} />
           </div>
-
+          
+          {/* Grid labels and ticks - positioned above drawer, scrolls with canvas */}
+          <div className="absolute inset-0 pointer-events-none z-10">
+            <GridLabels />
+          </div>
 
           {/* Base Drawer overlay */}
           <BaseDrawer contentHeight={200}>
