@@ -36,8 +36,6 @@ export function FullGameGame() {
             <ValueOverlay value={displayValue} label={overlayLabel} />
           </div>
 
-          {/* Grid labels - sticky above drawer */}
-          <GridLabels />
 
           {/* Base Drawer overlay */}
           <BaseDrawer contentHeight={200}>
