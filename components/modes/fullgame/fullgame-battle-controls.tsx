@@ -205,26 +205,24 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
       </Button>
 
       {/* Status bar */}
-      <div className="flex flex-col gap-1.5 pt-2 border-t border-border">
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>health: {currentTank.health}%</span>
-        </div>
-        <div className="flex justify-between items-center gap-4 text-sm">
+      <div className="flex justify-between items-center gap-3 pt-2 border-t border-border text-xs">
+        <span className="text-muted-foreground">health: {currentTank.health}%</span>
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             <span className="text-muted-foreground">iron:</span>
-            <span className="font-semibold text-base" style={{ color: "oklch(0.65 0.15 220)" }}>
+            <span className="font-semibold" style={{ color: "oklch(0.65 0.15 220)" }}>
               {inventory.iron}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-muted-foreground">copper:</span>
-            <span className="font-semibold text-base" style={{ color: "oklch(0.70 0.20 60)" }}>
+            <span className="font-semibold" style={{ color: "oklch(0.70 0.20 60)" }}>
               {inventory.copper}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-muted-foreground">oil:</span>
-            <span className="font-semibold text-base" style={{ color: "oklch(0.50 0.10 0)" }}>
+            <span className="font-semibold" style={{ color: "oklch(0.50 0.10 0)" }}>
               {inventory.oil}
             </span>
           </div>
