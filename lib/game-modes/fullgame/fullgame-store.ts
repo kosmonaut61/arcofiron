@@ -477,16 +477,18 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     }
 
     // Regular weapon logic (baby missile, etc.)
+    // Angle system: 0° = left, 90° = up, 180° = right
+    // Convert to standard math angle where 0° = right, 90° = up, 180° = left
     const visualAngle = 180 - tank.angle
     const angleRad = (visualAngle * Math.PI) / 180
     const speed = tank.power * 0.15
-    // Player (index 0) fires rightward, enemies fire leftward
-    const direction = state.currentTankIndex === 0 ? 1 : -1
+    // In fullgame, player always fires rightward, so no direction flip needed
+    // The angle system already handles direction correctly
 
     const projectile: Projectile = {
       x: tank.x,
       y: tank.y - 5,
-      vx: Math.cos(angleRad) * speed * direction,
+      vx: Math.cos(angleRad) * speed,
       vy: -Math.sin(angleRad) * speed,
       weapon,
       tankId: tank.id,
