@@ -475,9 +475,33 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       // Check if this is an extractor
       if (p.weapon.id.includes("extractor")) {
         const extractorType = p.weapon.id.split("-")[0] as MaterialType
-        // We'll need to pass the callback through the store or use a different mechanism
-        // For now, we'll add it without callback and handle failure in updateExtractors
-        get().addExtractor(hitX, hitY, extractorType)
+        const successRate = p.weapon.successRate ?? 0.2
+        
+        // Apply success rate - only 20% (or weapon's rate) of extractors succeed
+        if (Math.random() < successRate) {
+          // Success - try to add extractor (will still fail if wrong material/wrong location)
+          get().addExtractor(hitX, hitY, extractorType)
+        } else {
+          // Failure - show crash animation
+          get().addExplosion(hitX, hitY, 20)
+          const crashParticles: NapalmParticle[] = []
+          for (let i = 0; i < 15; i++) {
+            crashParticles.push({
+              x: hitX + (Math.random() - 0.5) * 40,
+              y: hitY,
+              life: 30 + Math.random() * 20,
+              maxLife: 50,
+            })
+          }
+          set((state) => ({
+            napalmParticles: [...state.napalmParticles, ...crashParticles],
+            extractorFailureMessage: "Extraction landing failed!",
+          }))
+          setTimeout(() => {
+            get().clearExtractorFailureMessage()
+          }, 2000)
+        }
+        
         set({ projectile: { ...p, active: false }, isProcessingShot: false })
         return false
       }
@@ -659,20 +683,9 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       const currentTargetX = playerTank.x
       const currentTargetY = playerTank.y
 
-      // Apply gravity for arcing trajectory
+      // Apply gravity for arcing trajectory (no homing - pure physics arc)
       let vx = proj.vx
       let vy = proj.vy + gravity // Gravity pulls down
-      
-      // Light homing correction - nudge toward target but keep arc
-      const dx = currentTargetX - proj.x
-      const dy = currentTargetY - proj.y
-      const distance = Math.sqrt(dx * dx + dy * dy)
-      
-      // Apply slight horizontal correction toward target
-      if (distance > 20) {
-        const correctionStrength = 0.1 // Light correction to maintain arc
-        vx += (dx / distance) * correctionStrength
-      }
 
       const newX = proj.x + vx
       const newY = proj.y + vy
