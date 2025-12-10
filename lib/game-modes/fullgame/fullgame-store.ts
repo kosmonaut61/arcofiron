@@ -194,12 +194,14 @@ function calculatePerfectExtractorShot(
   wind: number,
   terrain: number[],
 ): { angle: number; power: number } {
-  let bestAngle = 45
+  let bestAngle = 135 // Start with angle that fires rightward (90-180 range)
   let bestPower = 50
   let bestDistance = Number.POSITIVE_INFINITY
 
-  // Coarse search
-  for (let angle = 10; angle <= 170; angle += 3) {
+  // Coarse search - only angles that fire rightward (90-180 range)
+  // In game angle system: 0° = left, 90° = up, 180° = right
+  // For rightward firing, we need angles > 90° (which gives visualAngle < 90°, cos > 0)
+  for (let angle = 91; angle <= 170; angle += 3) {
     for (let power = 20; power <= 100; power += 5) {
       const result = simulateExtractorShot(startX, startY, angle, power, wind, terrain)
       const distance = Math.sqrt((result.hitX - targetX) ** 2 + (result.hitY - targetY) ** 2)
@@ -215,7 +217,8 @@ function calculatePerfectExtractorShot(
   // Fine-tune with smaller steps
   for (let angle = bestAngle - 5; angle <= bestAngle + 5; angle += 1) {
     for (let power = bestPower - 5; power <= bestPower + 5; power += 1) {
-      if (angle < 5 || angle > 175 || power < 20 || power > 100) continue
+      // Ensure angle stays in rightward range (91-170)
+      if (angle < 91 || angle > 170 || power < 20 || power > 100) continue
 
       const result = simulateExtractorShot(startX, startY, angle, power, wind, terrain)
       const distance = Math.sqrt((result.hitX - targetX) ** 2 + (result.hitY - targetY) ** 2)
@@ -244,7 +247,8 @@ function generateExtractorMissVariants(
     { angle: perfectAngle - 5 - Math.random() * 5, power: perfectPower + 10 + Math.random() * 10 },
     { angle: perfectAngle + 8 + Math.random() * 5, power: perfectPower + 15 + Math.random() * 10 },
   ].map(({ angle, power }) => ({
-    angle: Math.max(10, Math.min(170, angle)),
+    // Constrain to rightward-firing angles (91-170)
+    angle: Math.max(91, Math.min(170, angle)),
     power: Math.max(20, Math.min(100, power)),
   }))
 }
@@ -452,6 +456,8 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
           : missVariants[Math.floor(Math.random() * missVariants.length)]
 
       // Fire with calculated trajectory
+      // Extractors always fire rightward (toward material nodes)
+      const direction = 1
       const visualAngle = 180 - selectedShot.angle
       const angleRad = (visualAngle * Math.PI) / 180
       const speed = selectedShot.power * 0.15
@@ -459,7 +465,7 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       const projectile: Projectile = {
         x: tank.x,
         y: tank.y - 5,
-        vx: Math.cos(angleRad) * speed,
+        vx: Math.cos(angleRad) * speed * direction,
         vy: -Math.sin(angleRad) * speed,
         weapon,
         tankId: tank.id,
@@ -474,11 +480,13 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     const visualAngle = 180 - tank.angle
     const angleRad = (visualAngle * Math.PI) / 180
     const speed = tank.power * 0.15
+    // Player (index 0) fires rightward, enemies fire leftward
+    const direction = state.currentTankIndex === 0 ? 1 : -1
 
     const projectile: Projectile = {
       x: tank.x,
       y: tank.y - 5,
-      vx: Math.cos(angleRad) * speed,
+      vx: Math.cos(angleRad) * speed * direction,
       vy: -Math.sin(angleRad) * speed,
       weapon,
       tankId: tank.id,
