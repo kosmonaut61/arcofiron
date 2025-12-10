@@ -87,6 +87,44 @@ export interface TerrainPoint {
   y: number
 }
 
+export type MaterialType = "iron" | "copper" | "oil"
+
+export interface MaterialNode {
+  id: string
+  x: number // Center X position
+  y: number // Terrain Y at center
+  type: MaterialType
+  segmentStart: number // Which grid segment this node starts at (0-63)
+  segmentWidth: number // How many segments wide (3-5)
+  shimmerPhase: number // For animation
+}
+
+export interface Extractor {
+  id: string
+  x: number
+  y: number
+  type: MaterialType
+  health: number
+  maxHealth: number
+  deployProgress: number // 0-1 for deployment animation
+  lastExtractionTime: number // Timestamp of last extraction
+  extractionRate: number // Units per 30 seconds
+  nodeId: string | null // Which node it's extracting from
+}
+
+export interface MaterialProjectile {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  type: MaterialType
+  amount: number
+  targetX: number // Base X position
+  targetY: number // Base Y position
+  active: boolean
+  trail: { x: number; y: number }[]
+}
+
 export type GamePhase = "menu" | "buying" | "battle" | "turnEnd" | "gameOver"
 
 export interface GameState {
@@ -106,6 +144,43 @@ export interface GameState {
 }
 
 export const WEAPONS: Weapon[] = [
+  // Extractors (Full Game mode)
+  {
+    id: "iron-extractor",
+    name: "Iron Extractor",
+    damage: 0,
+    radius: 0,
+    price: 0,
+    quantity: 99,
+    icon: "⚙",
+    behavior: "standard",
+    category: "basic",
+    description: "Extracts iron from nodes",
+  },
+  {
+    id: "copper-extractor",
+    name: "Copper Extractor",
+    damage: 0,
+    radius: 0,
+    price: 0,
+    quantity: 99,
+    icon: "⚙",
+    behavior: "standard",
+    category: "basic",
+    description: "Extracts copper from nodes",
+  },
+  {
+    id: "oil-extractor",
+    name: "Oil Extractor",
+    damage: 0,
+    radius: 0,
+    price: 0,
+    quantity: 99,
+    icon: "⚙",
+    behavior: "standard",
+    category: "basic",
+    description: "Extracts oil from nodes",
+  },
   // Basic weapons
   {
     id: "baby-missile",
