@@ -399,91 +399,14 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       console.error(`[FIRE] No tank found at index ${state.currentTankIndex}`)
       return
     }
-    console.log(`[FIRE] Tank state - Angle: ${tank.angle} | Power: ${tank.power} | X: ${tank.x} | Y: ${tank.y}`)
+    console.log(`[FIRE] Tank state - Angle: ${tank.angle} | Power: ${tank.power} | X: ${tank.x} | Y: ${tank.y} | CurrentWeapon: ${tank.currentWeapon}`)
     const weapon = tank.weapons[tank.currentWeapon]
+    console.log(`[FIRE] Selected weapon: ${weapon.id} | Name: ${weapon.name}`)
 
     if (weapon.quantity <= 0 && weapon.price > 0) return
 
-    // Check if this is an extractor
-    if (weapon.id.includes("extractor")) {
-      const extractorType = weapon.id.split("-")[0] as MaterialType
-
-      // Find nearest material node of matching type
-      let nearestNode: MaterialNode | null = null
-      let minDistance = Number.POSITIVE_INFINITY
-
-      state.materialNodes.forEach((node) => {
-        if (node.type === extractorType) {
-          const dist = Math.sqrt((node.x - tank.x) ** 2 + (node.y - tank.y) ** 2)
-          if (dist < minDistance) {
-            minDistance = dist
-            nearestNode = node
-          }
-        }
-      })
-
-      // If no node found, fire with default trajectory (will fail on landing)
-      if (!nearestNode) {
-        const visualAngle = 180 - tank.angle
-        const angleRad = (visualAngle * Math.PI) / 180
-        const speed = tank.power * 0.15
-
-        const projectile: Projectile = {
-          x: tank.x,
-          y: tank.y - 5,
-          vx: Math.cos(angleRad) * speed,
-          vy: -Math.sin(angleRad) * speed,
-          weapon,
-          tankId: tank.id,
-          active: true,
-        }
-
-        set({ projectile, phase: "battle", isProcessingShot: true, tracerTrail: [] })
-        return
-      }
-
-      // Calculate perfect shot to the target node
-      const perfect = calculatePerfectExtractorShot(
-        tank.x,
-        tank.y,
-        nearestNode.x,
-        nearestNode.y,
-        state.wind,
-        state.terrain,
-      )
-
-      // Generate miss variants
-      const missVariants = generateExtractorMissVariants(perfect.angle, perfect.power)
-
-      // Use weapon's success rate (default 0.2 for base extractors)
-      const successRate = weapon.successRate ?? 0.2
-
-      // Randomly select based on success rate
-      const allOptions = [perfect, ...missVariants]
-      const selectedShot =
-        Math.random() < successRate
-          ? perfect
-          : missVariants[Math.floor(Math.random() * missVariants.length)]
-
-      // Fire with calculated trajectory
-      // Convert slider angle to math angle (same as regular weapons)
-      const mathAngle = 180 - selectedShot.angle
-      const angleRad = (mathAngle * Math.PI) / 180
-      const speed = selectedShot.power * 0.15
-
-      const projectile: Projectile = {
-        x: tank.x,
-        y: tank.y - 5,
-        vx: Math.cos(angleRad) * speed,
-        vy: -Math.sin(angleRad) * speed,
-        weapon,
-        tankId: tank.id,
-        active: true,
-      }
-
-      set({ projectile, phase: "battle", isProcessingShot: true, tracerTrail: [] })
-      return
-    }
+    // Extractors fire using player's angle/power (same as regular weapons)
+    // The auto-aim logic is only used when extractors send materials back to base
 
     // Regular weapon logic (baby missile, etc.)
     // Simple, intuitive angle system:
