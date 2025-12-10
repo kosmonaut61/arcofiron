@@ -482,17 +482,21 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
         if (node && extractor.health > 0) {
           // Check if it's time to extract
           if (now - extractor.lastExtractionTime >= EXTRACTION_INTERVAL) {
-            // Create material projectile heading to base
+            // Create material projectile with arcing trajectory
             const dx = playerTank.x - extractor.x
             const dy = playerTank.y - extractor.y
             const distance = Math.sqrt(dx * dx + dy * dy)
-            const speed = 3
-
+            
+            // Calculate launch angle for arc (aim slightly above target)
+            const baseAngle = Math.atan2(dy, dx)
+            const launchAngle = baseAngle - 0.3 // Launch upward for arc
+            const launchSpeed = 4.5 // Initial velocity
+            
             const materialProj: MaterialProjectile = {
               x: extractor.x,
               y: extractor.y - 5,
-              vx: (dx / distance) * speed,
-              vy: (dy / distance) * speed,
+              vx: Math.cos(launchAngle) * launchSpeed,
+              vy: Math.sin(launchAngle) * launchSpeed,
               type: extractor.type,
               amount: extractor.extractionRate,
               targetX: playerTank.x,
@@ -524,7 +528,7 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       return
     }
 
-    const gravity = 0.1
+    const gravity = 0.15 // Gravity for arc
     const stillActive: MaterialProjectile[] = []
 
     state.materialProjectiles.forEach((proj) => {
@@ -534,18 +538,19 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       const currentTargetX = playerTank.x
       const currentTargetY = playerTank.y
 
-      // Recalculate velocity to always aim at base (homing behavior)
+      // Apply gravity for arcing trajectory
+      let vx = proj.vx
+      let vy = proj.vy + gravity // Gravity pulls down
+      
+      // Light homing correction - nudge toward target but keep arc
       const dx = currentTargetX - proj.x
       const dy = currentTargetY - proj.y
       const distance = Math.sqrt(dx * dx + dy * dy)
-      const speed = 3
-
-      // Only recalculate if not too close (to avoid jitter)
-      let vx = proj.vx
-      let vy = proj.vy
-      if (distance > 30) {
-        vx = (dx / distance) * speed
-        vy = (dy / distance) * speed
+      
+      // Apply slight horizontal correction toward target
+      if (distance > 20) {
+        const correctionStrength = 0.1 // Light correction to maintain arc
+        vx += (dx / distance) * correctionStrength
       }
 
       const newX = proj.x + vx

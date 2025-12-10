@@ -378,13 +378,17 @@ export const useSkirmishStore = create<SkirmishStore>((set, get) => ({
   deformTerrain: (x, radius) =>
     set((state) => {
       const newTerrain = [...state.terrain]
-      const startIdx = Math.max(0, Math.floor(x + SCROLL_PADDING - radius))
-      const endIdx = Math.min(TOTAL_WIDTH, Math.floor(x + SCROLL_PADDING + radius))
+      const centerIdx = Math.floor(x + SCROLL_PADDING)
+      const startIdx = Math.max(0, centerIdx - radius)
+      const endIdx = Math.min(TOTAL_WIDTH, centerIdx + radius)
 
       for (let i = startIdx; i < endIdx; i++) {
-        const dist = Math.abs(i - (x + SCROLL_PADDING))
-        const depth = Math.sqrt(radius * radius - dist * dist)
-        newTerrain[i] = Math.min(CANVAS_HEIGHT, newTerrain[i] + depth * 1.5)
+        const dist = Math.abs(i - centerIdx)
+        if (dist < radius) {
+          const depth = Math.sqrt(radius * radius - dist * dist)
+          // Add depth to create crater (Y increases downward in canvas)
+          newTerrain[i] = Math.min(CANVAS_HEIGHT, newTerrain[i] + depth * 1.5)
+        }
       }
 
       const newTanks = state.tanks.map((tank) => {
