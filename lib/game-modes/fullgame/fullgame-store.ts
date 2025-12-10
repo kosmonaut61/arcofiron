@@ -22,7 +22,7 @@ const TOTAL_WIDTH = CANVAS_WIDTH + SCROLL_PADDING * 2
 export { CANVAS_WIDTH, CANVAS_HEIGHT, SCROLL_PADDING, TOTAL_WIDTH }
 
 const EXTRACTOR_DEPLOY_TIME = 2000 // 2 seconds deployment animation
-const EXTRACTION_INTERVAL = 30000 // 30 seconds
+const EXTRACTION_INTERVAL = 1000 // 1 second (temporarily for debugging)
 const EXTRACTION_AMOUNT = 5 // 5 units per extraction
 const EXTRACTOR_MAX_HEALTH = 25
 const EXTRACTOR_PROXIMITY_RADIUS = 50 // How close extractor needs to be to node center
