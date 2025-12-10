@@ -388,7 +388,7 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
   fireProjectile: () => {
     console.log('[FIRE] fireProjectile called!')
     const state = get()
-    console.log('[FIRE] State check:', { isProcessingShot: state.isProcessingShot, currentTankIndex: state.currentTankIndex, tanksLength: state.tanks.length })
+    console.log(`[FIRE] State check - isProcessingShot: ${state.isProcessingShot} | currentTankIndex: ${state.currentTankIndex} | tanksLength: ${state.tanks.length}`)
     if (state.isProcessingShot) {
       console.log('[FIRE] Already processing shot, returning')
       return
@@ -396,10 +396,10 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
 
     const tank = state.tanks[state.currentTankIndex]
     if (!tank) {
-      console.error('[FIRE] No tank found at index', state.currentTankIndex)
+      console.error(`[FIRE] No tank found at index ${state.currentTankIndex}`)
       return
     }
-    console.log('[FIRE] Tank state:', { angle: tank.angle, power: tank.power, x: tank.x, y: tank.y })
+    console.log(`[FIRE] Tank state - Angle: ${tank.angle} | Power: ${tank.power} | X: ${tank.x} | Y: ${tank.y}`)
     const weapon = tank.weapons[tank.currentWeapon]
 
     if (weapon.quantity <= 0 && weapon.price > 0) return
@@ -502,16 +502,9 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     const vy = -Math.sin(angleRad) * speed
 
     // Debug: log the values to see what's happening
-    console.log('[FIRE DEBUG]', {
-      sliderAngle,
-      mathAngle: mathAngle.toFixed(1),
-      angleRad: angleRad.toFixed(3),
-      cos: Math.cos(angleRad).toFixed(3),
-      sin: Math.sin(angleRad).toFixed(3),
-      speed,
-      vx: vx.toFixed(2),
-      vy: vy.toFixed(2),
-    })
+    const expectedDir = sliderAngle === 0 ? 'LEFT (vx should be negative)' : sliderAngle === 90 ? 'UP (vx should be 0)' : sliderAngle === 180 ? 'RIGHT (vx should be positive)' : 'OTHER'
+    console.log(`[FIRE DEBUG] SliderAngle: ${sliderAngle} | MathAngle: ${mathAngle.toFixed(1)} | AngleRad: ${angleRad.toFixed(3)} | Cos: ${Math.cos(angleRad).toFixed(3)} | Sin: ${Math.sin(angleRad).toFixed(3)} | Speed: ${speed.toFixed(2)} | VX: ${vx.toFixed(2)} | VY: ${vy.toFixed(2)} | Expected: ${expectedDir}`)
+    console.log(`[FIRE] Creating projectile with vx: ${vx.toFixed(2)}, vy: ${vy.toFixed(2)}`)
 
     const projectile: Projectile = {
       x: tank.x,

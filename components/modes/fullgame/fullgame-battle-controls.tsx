@@ -147,7 +147,10 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
             value={currentTank.angle}
             min={0}
             max={180}
-            onChange={(value) => updateTank(currentTank.id, { angle: value })}
+            onChange={(value) => {
+              console.log(`[SLIDER] Angle changed to: ${value}`)
+              updateTank(currentTank.id, { angle: value })
+            }}
             label="angle"
             unit="°"
             disabled={!canFire}
@@ -202,7 +205,7 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
       {/* Fire button */}
       <Button 
         onClick={() => {
-          console.log('[BUTTON] Fire button clicked!', { canFire, phase, isProcessingShot })
+          console.log(`[BUTTON] Fire button clicked! canFire: ${canFire} | phase: ${phase} | isProcessingShot: ${isProcessingShot}`)
           fireProjectile()
         }} 
         disabled={!canFire} 
