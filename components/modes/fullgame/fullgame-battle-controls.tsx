@@ -200,7 +200,14 @@ export function FullGameBattleControls({ onOverlayChange }: FullGameBattleContro
       </div>
 
       {/* Fire button */}
-      <Button onClick={fireProjectile} disabled={!canFire} className="w-full h-9 bg-white/20 hover:bg-white/30 text-white border border-white/30">
+      <Button 
+        onClick={() => {
+          console.log('[BUTTON] Fire button clicked!', { canFire, phase, isProcessingShot })
+          fireProjectile()
+        }} 
+        disabled={!canFire} 
+        className="w-full h-9 bg-white/20 hover:bg-white/30 text-white border border-white/30"
+      >
         {isProcessingShot ? "firing..." : "fire"}
       </Button>
 

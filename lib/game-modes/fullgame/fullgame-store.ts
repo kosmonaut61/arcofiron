@@ -386,10 +386,20 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     })),
 
   fireProjectile: () => {
+    console.log('[FIRE] fireProjectile called!')
     const state = get()
-    if (state.isProcessingShot) return
+    console.log('[FIRE] State check:', { isProcessingShot: state.isProcessingShot, currentTankIndex: state.currentTankIndex, tanksLength: state.tanks.length })
+    if (state.isProcessingShot) {
+      console.log('[FIRE] Already processing shot, returning')
+      return
+    }
 
     const tank = state.tanks[state.currentTankIndex]
+    if (!tank) {
+      console.error('[FIRE] No tank found at index', state.currentTankIndex)
+      return
+    }
+    console.log('[FIRE] Tank state:', { angle: tank.angle, power: tank.power, x: tank.x, y: tank.y })
     const weapon = tank.weapons[tank.currentWeapon]
 
     if (weapon.quantity <= 0 && weapon.price > 0) return
@@ -527,6 +537,7 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     if (!state.projectile || !state.projectile.active) return false
 
     const p = state.projectile
+    const tank = state.tanks.find(t => t.id === p.tankId)
     const gravity = 0.15
     const windEffect = state.wind * 0.02
 
