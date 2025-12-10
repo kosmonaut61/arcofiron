@@ -141,6 +141,114 @@ function getSafeTankY(terrainY: number, canvasHeight: number): number {
   return terrainY - 8
 }
 
+// Simulate extractor shot trajectory (similar to AI shot simulation)
+function simulateExtractorShot(
+  startX: number,
+  startY: number,
+  angle: number,
+  power: number,
+  wind: number,
+  terrain: number[],
+): { hitX: number; hitY: number } {
+  const visualAngle = 180 - angle
+  const angleRad = (visualAngle * Math.PI) / 180
+  const speed = power * 0.15
+  const direction = 1 // Extractors always fire rightward
+
+  let x = startX
+  let y = startY - 5
+  let vx = Math.cos(angleRad) * speed * direction
+  let vy = -Math.sin(angleRad) * speed
+
+  const gravity = 0.15
+  const windEffect = wind * 0.02
+  const maxIterations = 2000
+
+  for (let i = 0; i < maxIterations; i++) {
+    x += vx
+    y += vy
+    vx += windEffect
+    vy += gravity
+
+    const terrainIndex = Math.floor(x) + SCROLL_PADDING
+    const terrainY = terrain[terrainIndex] ?? CANVAS_HEIGHT
+
+    const leftBound = -SCROLL_PADDING
+    const rightBound = CANVAS_WIDTH + SCROLL_PADDING
+
+    // Check if hit terrain or out of bounds
+    if (y >= terrainY || x < leftBound || x >= rightBound || y > CANVAS_HEIGHT) {
+      return { hitX: x, hitY: Math.min(y, terrainY) }
+    }
+  }
+
+  return { hitX: x, hitY: y }
+}
+
+// Calculate perfect shot to hit a material node
+function calculatePerfectExtractorShot(
+  startX: number,
+  startY: number,
+  targetX: number,
+  targetY: number,
+  wind: number,
+  terrain: number[],
+): { angle: number; power: number } {
+  let bestAngle = 45
+  let bestPower = 50
+  let bestDistance = Number.POSITIVE_INFINITY
+
+  // Coarse search
+  for (let angle = 10; angle <= 170; angle += 3) {
+    for (let power = 20; power <= 100; power += 5) {
+      const result = simulateExtractorShot(startX, startY, angle, power, wind, terrain)
+      const distance = Math.sqrt((result.hitX - targetX) ** 2 + (result.hitY - targetY) ** 2)
+
+      if (distance < bestDistance) {
+        bestDistance = distance
+        bestAngle = angle
+        bestPower = power
+      }
+    }
+  }
+
+  // Fine-tune with smaller steps
+  for (let angle = bestAngle - 5; angle <= bestAngle + 5; angle += 1) {
+    for (let power = bestPower - 5; power <= bestPower + 5; power += 1) {
+      if (angle < 5 || angle > 175 || power < 20 || power > 100) continue
+
+      const result = simulateExtractorShot(startX, startY, angle, power, wind, terrain)
+      const distance = Math.sqrt((result.hitX - targetX) ** 2 + (result.hitY - targetY) ** 2)
+
+      if (distance < bestDistance) {
+        bestDistance = distance
+        bestAngle = angle
+        bestPower = power
+      }
+    }
+  }
+
+  return { angle: bestAngle, power: bestPower }
+}
+
+// Generate miss variants for extractor shots
+function generateExtractorMissVariants(
+  perfectAngle: number,
+  perfectPower: number,
+): Array<{ angle: number; power: number }> {
+  return [
+    // Undershoot variants
+    { angle: perfectAngle - 8 - Math.random() * 5, power: perfectPower - 10 - Math.random() * 10 },
+    { angle: perfectAngle + 5 + Math.random() * 5, power: perfectPower - 15 - Math.random() * 10 },
+    // Overshoot variants
+    { angle: perfectAngle - 5 - Math.random() * 5, power: perfectPower + 10 + Math.random() * 10 },
+    { angle: perfectAngle + 8 + Math.random() * 5, power: perfectPower + 15 + Math.random() * 10 },
+  ].map(({ angle, power }) => ({
+    angle: Math.max(10, Math.min(170, angle)),
+    power: Math.max(20, Math.min(100, power)),
+  }))
+}
+
 function createTank(id: string, name: string, x: number, terrain: number[], color: string, isAI: boolean): Tank {
   const terrainIndex = gameXToTerrainIndex(x)
   const terrainY = terrain[terrainIndex] ?? CANVAS_HEIGHT * 0.7
@@ -286,9 +394,67 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     if (weapon.id.includes("extractor")) {
       const extractorType = weapon.id.split("-")[0] as MaterialType
 
-      const visualAngle = 180 - tank.angle
+      // Find nearest material node of matching type
+      let nearestNode: MaterialNode | null = null
+      let minDistance = Number.POSITIVE_INFINITY
+
+      state.materialNodes.forEach((node) => {
+        if (node.type === extractorType) {
+          const dist = Math.sqrt((node.x - tank.x) ** 2 + (node.y - tank.y) ** 2)
+          if (dist < minDistance) {
+            minDistance = dist
+            nearestNode = node
+          }
+        }
+      })
+
+      // If no node found, fire with default trajectory (will fail on landing)
+      if (!nearestNode) {
+        const visualAngle = 180 - tank.angle
+        const angleRad = (visualAngle * Math.PI) / 180
+        const speed = tank.power * 0.15
+
+        const projectile: Projectile = {
+          x: tank.x,
+          y: tank.y - 5,
+          vx: Math.cos(angleRad) * speed,
+          vy: -Math.sin(angleRad) * speed,
+          weapon,
+          tankId: tank.id,
+          active: true,
+        }
+
+        set({ projectile, phase: "battle", isProcessingShot: true, tracerTrail: [] })
+        return
+      }
+
+      // Calculate perfect shot to the target node
+      const perfect = calculatePerfectExtractorShot(
+        tank.x,
+        tank.y,
+        nearestNode.x,
+        nearestNode.y,
+        state.wind,
+        state.terrain,
+      )
+
+      // Generate miss variants
+      const missVariants = generateExtractorMissVariants(perfect.angle, perfect.power)
+
+      // Use weapon's success rate (default 0.2 for base extractors)
+      const successRate = weapon.successRate ?? 0.2
+
+      // Randomly select based on success rate
+      const allOptions = [perfect, ...missVariants]
+      const selectedShot =
+        Math.random() < successRate
+          ? perfect
+          : missVariants[Math.floor(Math.random() * missVariants.length)]
+
+      // Fire with calculated trajectory
+      const visualAngle = 180 - selectedShot.angle
       const angleRad = (visualAngle * Math.PI) / 180
-      const speed = tank.power * 0.15
+      const speed = selectedShot.power * 0.15
 
       const projectile: Projectile = {
         x: tank.x,

@@ -14,9 +14,9 @@ interface BaseGameStore {
 
 export const useBaseGameStore = create<BaseGameStore>((set) => ({
   phase: "menu",
-  gameMode: null,
+  gameMode: "fullgame", // Default to fullgame mode
   setPhase: (phase) => set({ phase }),
   setGameMode: (gameMode) => set({ gameMode }),
-  reset: () => set({ phase: "menu", gameMode: null }),
+  reset: () => set({ phase: "menu", gameMode: "fullgame" }),
 }))
 

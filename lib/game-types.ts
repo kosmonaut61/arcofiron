@@ -53,6 +53,7 @@ export interface Weapon {
   burnDuration?: number // For Napalm
   rollSpeed?: number // For Rollers
   digDepth?: number // For Diggers
+  successRate?: number // For Extractors (0.0 to 1.0, default 0.2)
 }
 
 export interface Projectile {
@@ -156,6 +157,7 @@ export const WEAPONS: Weapon[] = [
     behavior: "standard",
     category: "basic",
     description: "Extracts iron from nodes",
+    successRate: 0.2, // 20% success rate for base extractors
   },
   {
     id: "copper-extractor",
@@ -168,6 +170,7 @@ export const WEAPONS: Weapon[] = [
     behavior: "standard",
     category: "basic",
     description: "Extracts copper from nodes",
+    successRate: 0.2, // 20% success rate for base extractors
   },
   {
     id: "oil-extractor",
@@ -180,6 +183,7 @@ export const WEAPONS: Weapon[] = [
     behavior: "standard",
     category: "basic",
     description: "Extracts oil from nodes",
+    successRate: 0.2, // 20% success rate for base extractors
   },
   // Basic weapons
   {
