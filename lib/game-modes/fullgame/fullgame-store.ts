@@ -420,7 +420,7 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
 
     // Debug: log the values to see what's happening
     const expectedDir = sliderAngle === 0 ? 'LEFT (vx should be negative)' : sliderAngle === 90 ? 'UP (vx should be 0)' : sliderAngle === 180 ? 'RIGHT (vx should be positive)' : 'OTHER'
-    console.log(`[FIRE DEBUG] Weapon: ${weapon.id} | SliderAngle: ${sliderAngle} | MathAngle: ${mathAngle.toFixed(1)} | VX: ${vx.toFixed(2)} | VY: ${vy.toFixed(2)} | Expected: ${expectedDir}`)
+    console.log(`[FIRE DEBUG] Weapon: ${weapon.id} | SliderAngle: ${sliderAngle} | VX: ${vx.toFixed(2)} | VY: ${vy.toFixed(2)} | Expected: ${expectedDir}`)
 
     const projectile: Projectile = {
       x: tank.x,
