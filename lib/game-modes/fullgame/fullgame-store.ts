@@ -476,19 +476,32 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     }
 
     // Regular weapon logic (baby missile, etc.)
-    // Clean angle system:
-    // - Slider angle: 0° = left, 90° = up, 180° = right
-    // - Convert to math angle: 0° = right, 90° = up, 180° = left
-    // - Formula: mathAngle = 180 - sliderAngle
-    const mathAngle = 180 - tank.angle
+    // Simple, intuitive angle system:
+    // Slider: 0° = left, 90° = straight up, 180° = right
+    // We want: 0° fires left (-x), 90° fires up (-y), 180° fires right (+x)
+    // Standard math: 0° = right (+x), 90° = up (-y), 180° = left (-x)
+    // So we need: mathAngle = 180 - sliderAngle
+    
+    const sliderAngle = tank.angle || 90 // Default to 90 if undefined
+    const mathAngle = 180 - sliderAngle
     const angleRad = (mathAngle * Math.PI) / 180
     const speed = tank.power * 0.15
     
-    // Calculate velocity components
-    // In canvas: x increases right, y increases down
-    // Math angle 0° = right (+x), 90° = up (-y), 180° = left (-x)
+    // Velocity calculation
     const vx = Math.cos(angleRad) * speed
     const vy = -Math.sin(angleRad) * speed
+
+    // Debug: log the values to see what's happening
+    console.log('[FIRE DEBUG]', {
+      sliderAngle,
+      mathAngle: mathAngle.toFixed(1),
+      angleRad: angleRad.toFixed(3),
+      cos: Math.cos(angleRad).toFixed(3),
+      sin: Math.sin(angleRad).toFixed(3),
+      speed,
+      vx: vx.toFixed(2),
+      vy: vy.toFixed(2),
+    })
 
     const projectile: Projectile = {
       x: tank.x,
