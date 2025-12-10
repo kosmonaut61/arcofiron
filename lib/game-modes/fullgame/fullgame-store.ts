@@ -405,10 +405,7 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
 
     if (weapon.quantity <= 0 && weapon.price > 0) return
 
-    // Extractors fire using player's angle/power (same as regular weapons)
-    // The auto-aim logic is only used when extractors send materials back to base
-
-    // Regular weapon logic (baby missile, etc.)
+    // ALL weapons (extractors AND regular) use the same firing logic
     // Simple, intuitive angle system:
     // Slider: 0° = left, 90° = straight up, 180° = right
     // We want: 0° fires left (-x), 90° fires up (-y), 180° fires right (+x)
@@ -420,14 +417,13 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     const angleRad = (mathAngle * Math.PI) / 180
     const speed = tank.power * 0.15
     
-    // Velocity calculation
+    // Velocity calculation (same for ALL projectiles)
     const vx = Math.cos(angleRad) * speed
     const vy = -Math.sin(angleRad) * speed
 
     // Debug: log the values to see what's happening
     const expectedDir = sliderAngle === 0 ? 'LEFT (vx should be negative)' : sliderAngle === 90 ? 'UP (vx should be 0)' : sliderAngle === 180 ? 'RIGHT (vx should be positive)' : 'OTHER'
-    console.log(`[FIRE DEBUG] SliderAngle: ${sliderAngle} | MathAngle: ${mathAngle.toFixed(1)} | AngleRad: ${angleRad.toFixed(3)} | Cos: ${Math.cos(angleRad).toFixed(3)} | Sin: ${Math.sin(angleRad).toFixed(3)} | Speed: ${speed.toFixed(2)} | VX: ${vx.toFixed(2)} | VY: ${vy.toFixed(2)} | Expected: ${expectedDir}`)
-    console.log(`[FIRE] Creating projectile with vx: ${vx.toFixed(2)}, vy: ${vy.toFixed(2)}`)
+    console.log(`[FIRE DEBUG] Weapon: ${weapon.id} | SliderAngle: ${sliderAngle} | MathAngle: ${mathAngle.toFixed(1)} | VX: ${vx.toFixed(2)} | VY: ${vy.toFixed(2)} | Expected: ${expectedDir}`)
 
     const projectile: Projectile = {
       x: tank.x,
