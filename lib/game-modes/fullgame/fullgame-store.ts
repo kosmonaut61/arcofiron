@@ -453,29 +453,39 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     if (!state.projectile || !state.projectile.active) return false
 
     const p = state.projectile
-    const tank = state.tanks.find(t => t.id === p.tankId)
     const gravity = 0.15
     const windEffect = state.wind * 0.02
 
+    // Update position and velocity (same physics for all projectiles)
     const newX = p.x + p.vx
     const newY = p.y + p.vy
     const newVx = p.vx + windEffect
     const newVy = p.vy + gravity
 
+    // Terrain collision check (same for all projectiles)
     const terrainIndex = Math.floor(newX) + SCROLL_PADDING
     const terrainY = state.terrain[terrainIndex] ?? CANVAS_HEIGHT
+    
+    // Debug extractor projectiles
+    if (p.weapon.id.includes("extractor") && Math.random() < 0.01) {
+      console.log(`[EXTRACTOR PROJ] X: ${newX.toFixed(1)} Y: ${newY.toFixed(1)} | TerrainY: ${terrainY.toFixed(1)} | VX: ${newVx.toFixed(2)} VY: ${newVy.toFixed(2)} | WillHit: ${newY >= terrainY}`)
+    }
 
     const leftBound = -SCROLL_PADDING
     const rightBound = CANVAS_WIDTH + SCROLL_PADDING
 
+    // Check if hit terrain or out of bounds
     if (newY >= terrainY || newX < leftBound || newX >= rightBound || newY > CANVAS_HEIGHT) {
       const hitX = Math.max(leftBound, Math.min(rightBound - 1, newX))
       const hitY = Math.min(newY, terrainY)
 
-      // Check if this is an extractor
+      // Check if this is an extractor - same physics, different hit behavior
       if (p.weapon.id.includes("extractor")) {
         const extractorType = p.weapon.id.split("-")[0] as MaterialType
         const successRate = p.weapon.successRate ?? 0.2
+        
+        // Always show impact explosion for visual feedback
+        get().addExplosion(hitX, hitY, 15)
         
         // Apply success rate - only 20% (or weapon's rate) of extractors succeed
         if (Math.random() < successRate) {
@@ -483,7 +493,6 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
           get().addExtractor(hitX, hitY, extractorType)
         } else {
           // Failure - show crash animation
-          get().addExplosion(hitX, hitY, 20)
           const crashParticles: NapalmParticle[] = []
           for (let i = 0; i < 15; i++) {
             crashParticles.push({
@@ -515,6 +524,7 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       return false
     }
 
+    // Continue projectile movement (same for all)
     set({
       projectile: {
         ...p,
