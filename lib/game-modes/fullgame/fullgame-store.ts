@@ -90,15 +90,18 @@ function generateMaterialNodes(terrain: number[]): MaterialNode[] {
       let placed = false
 
       while (!placed && attempts < 50) {
-        // Each node spans exactly 1 grid segment
-        const segmentWidth = 1
-        const maxStartSegment = TOTAL_SEGMENTS - segmentWidth
-        const segmentStart = Math.floor(Math.random() * maxStartSegment)
+        // Each node spans 0.5 grid segments and is centered between grid lines
+        const segmentWidth = 0.5
+        // Place nodes at half-segment positions (between grid lines)
+        // Use segment indices 0 to TOTAL_SEGMENTS-1, but place at 0.5, 1.5, 2.5, etc.
+        const segmentIndex = Math.floor(Math.random() * TOTAL_SEGMENTS)
+        const segmentStart = segmentIndex // Store the segment index for reference
+        const x = (segmentIndex + 0.5) * SEGMENT_WIDTH // Center between two grid lines
 
-        // Check if this segment is already used
-        if (!usedSegments.has(segmentStart)) {
-          // Calculate center X position (center of the single segment)
-          const x = (segmentStart + 0.5) * SEGMENT_WIDTH
+        // Check if this half-segment area is already used (check both adjacent segments)
+        const leftSegment = segmentIndex
+        const rightSegment = (segmentIndex + 1) % TOTAL_SEGMENTS
+        if (!usedSegments.has(leftSegment) && !usedSegments.has(rightSegment)) {
           const terrainIndex = Math.floor(x + SCROLL_PADDING)
           const terrainY = terrain[terrainIndex] ?? CANVAS_HEIGHT * 0.7
 
@@ -106,8 +109,9 @@ function generateMaterialNodes(terrain: number[]): MaterialNode[] {
           if (terrainY <= topThreshold) {
             const nodeId = `${type}-${i}-${Date.now()}`
 
-            // Mark segment as used
-            usedSegments.add(segmentStart)
+            // Mark both adjacent segments as used
+            usedSegments.add(leftSegment)
+            usedSegments.add(rightSegment)
 
             nodes.push({
               id: nodeId,

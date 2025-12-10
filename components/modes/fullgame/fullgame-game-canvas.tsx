@@ -165,9 +165,10 @@ export function FullGameGameCanvas() {
     // Draw material nodes with stroke and radial gradient (refined look)
     const SEGMENT_WIDTH = CANVAS_WIDTH / 64 // Match grid system
     materialNodes.forEach((node) => {
-      const nodeStartX = (node.segmentStart * SEGMENT_WIDTH) + SCROLL_PADDING
-      const nodeWidth = node.segmentWidth * SEGMENT_WIDTH
-      const nodeCenterX = nodeStartX + nodeWidth / 2
+      // Node is centered between grid lines, so center is at (segmentStart + 0.5) * SEGMENT_WIDTH
+      const nodeCenterX = node.x + SCROLL_PADDING
+      const nodeWidth = node.segmentWidth * SEGMENT_WIDTH // 0.5 * SEGMENT_WIDTH
+      const nodeStartX = nodeCenterX - nodeWidth / 2
       
       // Find the terrain height at the center and edges of the node
       const centerTerrainIndex = Math.floor(nodeCenterX)
