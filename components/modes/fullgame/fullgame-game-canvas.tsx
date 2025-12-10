@@ -328,9 +328,8 @@ export function FullGameGameCanvas() {
       ctx.fillRect(tankX - 12, tank.y - 4, 24, 8)
       ctx.fillRect(tankX - 8, tank.y - 8, 16, 4)
 
-      // Match firing system: slider angle to math angle conversion
-      const mathAngle = 180 - tank.angle
-      const angleRad = (mathAngle * Math.PI) / 180
+      // Match firing system: slider angle IS the math angle (no conversion)
+      const angleRad = (tank.angle * Math.PI) / 180
       const barrelLength = 18
       ctx.beginPath()
       ctx.moveTo(tankX, tank.y - 6)

@@ -145,14 +145,13 @@ function getSafeTankY(terrainY: number, canvasHeight: number): number {
 function simulateExtractorShot(
   startX: number,
   startY: number,
-  angle: number, // Slider angle (0-180)
+  angle: number, // Slider angle (0-180) - same as firing system
   power: number,
   wind: number,
   terrain: number[],
 ): { hitX: number; hitY: number } {
-  // Convert slider angle to math angle
-  const mathAngle = 180 - angle
-  const angleRad = (mathAngle * Math.PI) / 180
+  // Slider angle IS the math angle (no conversion)
+  const angleRad = (angle * Math.PI) / 180
   const speed = power * 0.15
 
   let x = startX
@@ -194,14 +193,14 @@ function calculatePerfectExtractorShot(
   wind: number,
   terrain: number[],
 ): { angle: number; power: number } {
-  let bestAngle = 135 // Start with angle that fires rightward (90-180 range)
+  let bestAngle = 45 // Start with angle that fires rightward (0-90 range)
   let bestPower = 50
   let bestDistance = Number.POSITIVE_INFINITY
 
-  // Coarse search - only angles that fire rightward (90-180 range)
-  // In game angle system: 0° = left, 90° = up, 180° = right
-  // For rightward firing, we need angles > 90° (which gives visualAngle < 90°, cos > 0)
-  for (let angle = 91; angle <= 170; angle += 3) {
+  // Coarse search - only angles that fire rightward (0-90 range)
+  // In game angle system: 0° = right, 90° = up, 180° = left
+  // For rightward firing, we need angles < 90° (cos > 0)
+  for (let angle = 10; angle <= 80; angle += 3) {
     for (let power = 20; power <= 100; power += 5) {
       const result = simulateExtractorShot(startX, startY, angle, power, wind, terrain)
       const distance = Math.sqrt((result.hitX - targetX) ** 2 + (result.hitY - targetY) ** 2)
@@ -217,8 +216,8 @@ function calculatePerfectExtractorShot(
   // Fine-tune with smaller steps
   for (let angle = bestAngle - 5; angle <= bestAngle + 5; angle += 1) {
     for (let power = bestPower - 5; power <= bestPower + 5; power += 1) {
-      // Ensure angle stays in rightward range (91-170)
-      if (angle < 91 || angle > 170 || power < 20 || power > 100) continue
+      // Ensure angle stays in rightward range (10-80)
+      if (angle < 10 || angle > 80 || power < 20 || power > 100) continue
 
       const result = simulateExtractorShot(startX, startY, angle, power, wind, terrain)
       const distance = Math.sqrt((result.hitX - targetX) ** 2 + (result.hitY - targetY) ** 2)
@@ -247,8 +246,8 @@ function generateExtractorMissVariants(
     { angle: perfectAngle - 5 - Math.random() * 5, power: perfectPower + 10 + Math.random() * 10 },
     { angle: perfectAngle + 8 + Math.random() * 5, power: perfectPower + 15 + Math.random() * 10 },
   ].map(({ angle, power }) => ({
-    // Constrain to rightward-firing angles (91-170)
-    angle: Math.max(91, Math.min(170, angle)),
+    // Constrain to rightward-firing angles (10-80)
+    angle: Math.max(10, Math.min(80, angle)),
     power: Math.max(20, Math.min(100, power)),
   }))
 }
@@ -406,15 +405,13 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     if (weapon.quantity <= 0 && weapon.price > 0) return
 
     // ALL weapons (extractors AND regular) use the same firing logic
-    // Simple, intuitive angle system:
-    // Slider: 0° = left, 90° = straight up, 180° = right
-    // We want: 0° fires left (-x), 90° fires up (-y), 180° fires right (+x)
-    // Standard math: 0° = right (+x), 90° = up (-y), 180° = left (-x)
-    // So we need: mathAngle = 180 - sliderAngle
+    // Angle system: Slider angle directly maps to math angle
+    // Slider: 0° = right, 90° = up, 180° = left
+    // Math: 0° = right (+x), 90° = up (-y), 180° = left (-x)
+    // So slider angle IS the math angle (no conversion needed)
     
     const sliderAngle = tank.angle || 90 // Default to 90 if undefined
-    const mathAngle = 180 - sliderAngle
-    const angleRad = (mathAngle * Math.PI) / 180
+    const angleRad = (sliderAngle * Math.PI) / 180
     const speed = tank.power * 0.15
     
     // Velocity calculation (same for ALL projectiles)
