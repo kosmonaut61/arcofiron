@@ -71,6 +71,8 @@ export function FullGameGameCanvas() {
     updateMaterialProjectiles,
     updateMaterialNodes,
     wind,
+    napalmParticles,
+    updateNapalm,
   } = useFullGameStore()
 
   const currentTank = tanks[0] // Player tank
@@ -302,6 +304,20 @@ export function FullGameGameCanvas() {
       ctx.fill()
     })
 
+    // Draw crash debris particles (from failed extractor landings) - render after material projectiles
+    // Note: We use napalmParticles for crash debris, but render them with grey/brown colors
+    napalmParticles.forEach((p) => {
+      const alpha = p.life / p.maxLife
+      // Use grey/brown colors for crash debris instead of orange fire
+      const r = 80 + Math.random() * 40
+      const g = 60 + Math.random() * 30
+      const b = 40 + Math.random() * 20
+      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`
+      const terrainIndex = Math.floor(p.x + SCROLL_PADDING)
+      const terrainY = terrain[terrainIndex] || CANVAS_HEIGHT * 0.75
+      ctx.fillRect(p.x + SCROLL_PADDING - 2, terrainY - 4 - Math.random() * 8, 4, 8)
+    })
+
     // Draw tanks
     tanks.forEach((tank) => {
       if (tank.health <= 0) return
@@ -398,9 +414,10 @@ export function FullGameGameCanvas() {
       }
 
       // Update material systems
-      updateExtractors()
-      updateMaterialProjectiles()
-      updateMaterialNodes()
+    updateExtractors()
+    updateMaterialProjectiles()
+    updateMaterialNodes()
+    updateNapalm()
 
       draw()
 

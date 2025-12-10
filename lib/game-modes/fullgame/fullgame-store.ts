@@ -175,6 +175,7 @@ interface FullGameStore extends GameState {
   extractors: Extractor[]
   materialProjectiles: MaterialProjectile[]
   inventory: { iron: number; copper: number; oil: number }
+  extractorFailureMessage: string | null
 
   // Core game methods
   initGame: () => void
@@ -202,6 +203,7 @@ interface FullGameStore extends GameState {
   updateExtractors: () => void
   updateMaterialProjectiles: () => void
   updateMaterialNodes: () => void
+  clearExtractorFailureMessage: () => void
 
   // Full Game specific
   level: number
@@ -232,6 +234,7 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
   extractors: [],
   materialProjectiles: [],
   inventory: { iron: 0, copper: 0, oil: 0 },
+  extractorFailureMessage: null,
 
   initGame: () => {
     const terrain = generateTerrain()
@@ -351,6 +354,8 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       // Check if this is an extractor
       if (p.weapon.id.includes("extractor")) {
         const extractorType = p.weapon.id.split("-")[0] as MaterialType
+        // We'll need to pass the callback through the store or use a different mechanism
+        // For now, we'll add it without callback and handle failure in updateExtractors
         get().addExtractor(hitX, hitY, extractorType)
         set({ projectile: { ...p, active: false }, isProcessingShot: false })
         return false
@@ -394,6 +399,49 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       }
     })
 
+    // Check if extractor landed on wrong material type
+    let wrongMaterialNode: MaterialNode | null = null
+    state.materialNodes.forEach((node) => {
+      const dist = Math.sqrt((node.x - x) ** 2 + (node.y - y) ** 2)
+      if (dist < EXTRACTOR_PROXIMITY_RADIUS && node.type !== type) {
+        wrongMaterialNode = node
+      }
+    })
+
+    // If no matching node found OR landed on wrong material type, show crash
+    if (!nearestNode || wrongMaterialNode) {
+      // Create crash explosion
+      get().addExplosion(x, y, 20)
+      
+      // Create crash debris particles (similar to napalm but grey/brown for debris)
+      const crashParticles: NapalmParticle[] = []
+      for (let i = 0; i < 15; i++) {
+        crashParticles.push({
+          x: x + (Math.random() - 0.5) * 40,
+          y: y,
+          life: 30 + Math.random() * 20,
+          maxLife: 50,
+        })
+      }
+      
+      // Set failure message
+      const failureMessage = wrongMaterialNode 
+        ? "Wrong material type!" 
+        : "Extraction landing failed!"
+      
+      set((state) => ({
+        napalmParticles: [...state.napalmParticles, ...crashParticles],
+        extractorFailureMessage: failureMessage,
+      }))
+      
+      // Clear message after 2 seconds
+      setTimeout(() => {
+        get().clearExtractorFailureMessage()
+      }, 2000)
+      
+      return // Don't create extractor
+    }
+
     const extractorId = `extractor-${Date.now()}-${Math.random()}`
     const extractor: Extractor = {
       id: extractorId,
@@ -412,6 +460,8 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
       extractors: [...state.extractors, extractor],
     })
   },
+
+  clearExtractorFailureMessage: () => set({ extractorFailureMessage: null }),
 
   updateExtractors: () => {
     const state = get()
