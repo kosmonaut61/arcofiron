@@ -145,19 +145,19 @@ function getSafeTankY(terrainY: number, canvasHeight: number): number {
 function simulateExtractorShot(
   startX: number,
   startY: number,
-  angle: number,
+  angle: number, // Slider angle (0-180)
   power: number,
   wind: number,
   terrain: number[],
 ): { hitX: number; hitY: number } {
-  const visualAngle = 180 - angle
-  const angleRad = (visualAngle * Math.PI) / 180
+  // Convert slider angle to math angle
+  const mathAngle = 180 - angle
+  const angleRad = (mathAngle * Math.PI) / 180
   const speed = power * 0.15
-  const direction = 1 // Extractors always fire rightward
 
   let x = startX
   let y = startY - 5
-  let vx = Math.cos(angleRad) * speed * direction
+  let vx = Math.cos(angleRad) * speed
   let vy = -Math.sin(angleRad) * speed
 
   const gravity = 0.15
@@ -456,16 +456,15 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
           : missVariants[Math.floor(Math.random() * missVariants.length)]
 
       // Fire with calculated trajectory
-      // Extractors always fire rightward (toward material nodes)
-      const direction = 1
-      const visualAngle = 180 - selectedShot.angle
-      const angleRad = (visualAngle * Math.PI) / 180
+      // Convert slider angle to math angle (same as regular weapons)
+      const mathAngle = 180 - selectedShot.angle
+      const angleRad = (mathAngle * Math.PI) / 180
       const speed = selectedShot.power * 0.15
 
       const projectile: Projectile = {
         x: tank.x,
         y: tank.y - 5,
-        vx: Math.cos(angleRad) * speed * direction,
+        vx: Math.cos(angleRad) * speed,
         vy: -Math.sin(angleRad) * speed,
         weapon,
         tankId: tank.id,
@@ -477,19 +476,25 @@ export const useFullGameStore = create<FullGameStore>((set, get) => ({
     }
 
     // Regular weapon logic (baby missile, etc.)
-    // Angle system: 0° = left, 90° = up, 180° = right
-    // Convert to standard math angle where 0° = right, 90° = up, 180° = left
-    const visualAngle = 180 - tank.angle
-    const angleRad = (visualAngle * Math.PI) / 180
+    // Clean angle system:
+    // - Slider angle: 0° = left, 90° = up, 180° = right
+    // - Convert to math angle: 0° = right, 90° = up, 180° = left
+    // - Formula: mathAngle = 180 - sliderAngle
+    const mathAngle = 180 - tank.angle
+    const angleRad = (mathAngle * Math.PI) / 180
     const speed = tank.power * 0.15
-    // In fullgame, player always fires rightward, so no direction flip needed
-    // The angle system already handles direction correctly
+    
+    // Calculate velocity components
+    // In canvas: x increases right, y increases down
+    // Math angle 0° = right (+x), 90° = up (-y), 180° = left (-x)
+    const vx = Math.cos(angleRad) * speed
+    const vy = -Math.sin(angleRad) * speed
 
     const projectile: Projectile = {
       x: tank.x,
       y: tank.y - 5,
-      vx: Math.cos(angleRad) * speed,
-      vy: -Math.sin(angleRad) * speed,
+      vx,
+      vy,
       weapon,
       tankId: tank.id,
       active: true,
