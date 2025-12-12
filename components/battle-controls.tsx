@@ -60,7 +60,7 @@ export function BattleControls({ onOverlayChange }: BattleControlsProps) {
             onValueChange={(value) => updateTank(currentTank.id, { currentWeapon: Number.parseInt(value) })}
             disabled={!canFire}
           >
-            <SelectTrigger className="w-full h-8 text-sm">
+            <SelectTrigger className="w-full h-8 text-sm bg-white/10 border-white/20 text-white hover:bg-white/15">
               <SelectValue>
                 <span className="flex items-center gap-1">
                   <span>{currentWeapon.icon}</span>
@@ -68,13 +68,15 @@ export function BattleControls({ onOverlayChange }: BattleControlsProps) {
                 </span>
               </SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-black/90 backdrop-blur-md border-white/20">
               {categoryOrder.map((category) => {
                 const weapons = weaponsByCategory[category]
                 if (!weapons || weapons.length === 0) return null
                 return (
                   <SelectGroup key={category}>
-                    <SelectLabel className="text-xs uppercase tracking-widest">{categoryLabels[category]}</SelectLabel>
+                    <SelectLabel className="text-xs uppercase tracking-widest text-white/70">
+                      {categoryLabels[category]}
+                    </SelectLabel>
                     {weapons.map(({ weapon, index }) => {
                       const isDisabled = weapon.quantity <= 0 && weapon.price > 0
                       return (
@@ -82,12 +84,12 @@ export function BattleControls({ onOverlayChange }: BattleControlsProps) {
                           key={weapon.id}
                           value={index.toString()}
                           disabled={isDisabled}
-                          className="flex items-center gap-2"
+                          className="flex items-center gap-2 text-white hover:bg-white/10"
                         >
                           <span className="flex items-center gap-2 w-full">
                             <span>{weapon.icon}</span>
                             <span className="flex-1">{weapon.name}</span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-white/60">
                               ×{weapon.quantity === 99 ? "∞" : weapon.quantity}
                             </span>
                           </span>
@@ -100,7 +102,7 @@ export function BattleControls({ onOverlayChange }: BattleControlsProps) {
             </SelectContent>
           </Select>
         </div>
-        <span className="text-xs text-muted-foreground whitespace-nowrap">
+        <span className="text-xs text-white/60 whitespace-nowrap">
           ×{currentWeapon.quantity === 99 ? "∞" : currentWeapon.quantity}
         </span>
       </div>
@@ -112,7 +114,7 @@ export function BattleControls({ onOverlayChange }: BattleControlsProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0"
+            className="h-8 w-8 shrink-0 text-white/70 hover:text-white hover:bg-white/10"
             onClick={() => updateTank(currentTank.id, { angle: Math.max(0, currentTank.angle - 1) })}
             disabled={!canFire || currentTank.angle <= 0}
           >
@@ -132,7 +134,7 @@ export function BattleControls({ onOverlayChange }: BattleControlsProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0"
+            className="h-8 w-8 shrink-0 text-white/70 hover:text-white hover:bg-white/10"
             onClick={() => updateTank(currentTank.id, { angle: Math.min(180, currentTank.angle + 1) })}
             disabled={!canFire || currentTank.angle >= 180}
           >
@@ -145,7 +147,7 @@ export function BattleControls({ onOverlayChange }: BattleControlsProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0"
+            className="h-8 w-8 shrink-0 text-white/70 hover:text-white hover:bg-white/10"
             onClick={() => updateTank(currentTank.id, { power: Math.max(10, currentTank.power - 1) })}
             disabled={!canFire || currentTank.power <= 10}
           >
@@ -165,7 +167,7 @@ export function BattleControls({ onOverlayChange }: BattleControlsProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0"
+            className="h-8 w-8 shrink-0 text-white/70 hover:text-white hover:bg-white/10"
             onClick={() => updateTank(currentTank.id, { power: Math.min(100, currentTank.power + 1) })}
             disabled={!canFire || currentTank.power >= 100}
           >
@@ -175,12 +177,12 @@ export function BattleControls({ onOverlayChange }: BattleControlsProps) {
       </div>
 
       {/* Fire button */}
-      <Button onClick={fireProjectile} disabled={!canFire} className="w-full h-9">
+      <Button onClick={fireProjectile} disabled={!canFire} className="w-full h-9 bg-white text-black hover:bg-white/90">
         {isProcessingShot ? "firing..." : "fire"}
       </Button>
 
       {/* Status bar */}
-      <div className="flex justify-between text-xs text-muted-foreground pt-1 border-t border-border">
+      <div className="flex justify-between text-xs text-white/60 pt-1 border-t border-white/10">
         <span>health: {currentTank.health}%</span>
         <span>${currentTank.money}</span>
       </div>

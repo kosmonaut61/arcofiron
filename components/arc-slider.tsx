@@ -110,7 +110,7 @@ export function ArcSlider({
 
   return (
     <div className={`flex flex-col items-center ${disabled ? "opacity-50" : ""}`}>
-      <span className="text-[9px] uppercase tracking-widest text-muted-foreground">{label}</span>
+      <span className="text-[9px] uppercase tracking-widest text-white/70">{label}</span>
       <svg
         ref={svgRef}
         width={width}
@@ -122,25 +122,11 @@ export function ArcSlider({
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        <path
-          d={trackPath}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          opacity={0.2}
-        />
-        <path
-          d={filledPath}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          opacity={0.7}
-        />
-        <circle cx={handleX} cy={handleY} r={handleRadius} fill="white" stroke="currentColor" strokeWidth={2} />
+        <path d={trackPath} fill="none" stroke="white" strokeWidth={strokeWidth} strokeLinecap="round" opacity={0.3} />
+        <path d={filledPath} fill="none" stroke="white" strokeWidth={strokeWidth} strokeLinecap="round" opacity={0.7} />
+        <circle cx={handleX} cy={handleY} r={handleRadius} fill="#1a1a1a" stroke="white" strokeWidth={2} />
       </svg>
-      <span className="text-sm font-medium -mt-1">
+      <span className="text-sm font-medium -mt-1 text-white">
         {value}
         {unit}
       </span>

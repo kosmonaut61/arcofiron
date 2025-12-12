@@ -7,6 +7,19 @@ import { WindHUD } from "@/components/wind-hud"
 
 const VIEWPORT_WIDTH = 375 // Visible viewport width
 
+function adjustMechBrightness(color: string, percent: number): string {
+  // Parse oklch color string and adjust lightness
+  const match = color.match(/oklch$$([\d.]+)\s+([\d.]+)\s+([\d.]+)$$/)
+  if (match) {
+    const lightness = Number.parseFloat(match[1])
+    const chroma = match[2]
+    const hue = match[3]
+    const newLightness = Math.min(1, Math.max(0, lightness + percent / 100))
+    return `oklch(${newLightness} ${chroma} ${hue})`
+  }
+  return color
+}
+
 export function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -179,29 +192,110 @@ export function GameCanvas() {
       if (tank.health <= 0) return
 
       const tankX = tank.x + SCROLL_PADDING
-      ctx.fillStyle = tank.color
+      const mechColor = tank.mechColor
 
-      ctx.fillRect(tankX - 12, tank.y - 4, 24, 8)
-      ctx.fillRect(tankX - 8, tank.y - 8, 16, 4)
+      ctx.save()
+      ctx.shadowColor = "rgba(255, 255, 255, 0.6)"
+      ctx.shadowBlur = 8
+      ctx.shadowOffsetX = 0
+      ctx.shadowOffsetY = 0
+
+      // Draw legs (two angled rectangles)
+      ctx.fillStyle = adjustMechBrightness(mechColor, -20)
+
+      // Left leg
+      ctx.fillRect(tankX - 10, tank.y - 2, 6, 10)
+
+      // Right leg
+      ctx.fillRect(tankX + 4, tank.y - 2, 6, 10)
+
+      // Draw main body (larger rectangular torso)
+      ctx.fillStyle = adjustMechBrightness(mechColor, 10)
+      ctx.fillRect(tankX - 10, tank.y - 16, 20, 14)
+
+      // Draw little arms on the sides of the torso
+      ctx.fillStyle = adjustMechBrightness(mechColor, 5)
+
+      // Left arm
+      ctx.fillRect(tankX - 14, tank.y - 14, 4, 8)
+
+      // Right arm
+      ctx.fillRect(tankX + 10, tank.y - 14, 4, 8)
+
+      // Draw head (smaller rectangle on top)
+      ctx.fillStyle = adjustMechBrightness(mechColor, 20)
+      ctx.fillRect(tankX - 6, tank.y - 22, 12, 6)
+
+      // Draw cockpit detail (lighter rectangle inside head)
+      const lighterColor = adjustMechBrightness(mechColor, 40)
+      ctx.fillStyle = lighterColor
+      ctx.fillRect(tankX - 4, tank.y - 20, 8, 3)
+
+      ctx.restore()
 
       // Using (180 - angle) so slider left = shoot left, slider right = shoot right
       const visualAngle = 180 - tank.angle
       const angleRad = (visualAngle * Math.PI) / 180
       const barrelLength = 18
       const direction = index === 0 ? 1 : -1
+
+      ctx.save()
+      ctx.shadowColor = "rgba(255, 255, 255, 0.6)"
+      ctx.shadowBlur = 8
+      ctx.shadowOffsetX = 0
+      ctx.shadowOffsetY = 0
+
       ctx.beginPath()
-      ctx.moveTo(tankX, tank.y - 6)
-      ctx.lineTo(tankX + Math.cos(angleRad) * barrelLength * direction, tank.y - 6 - Math.sin(angleRad) * barrelLength)
-      ctx.strokeStyle = tank.color
-      ctx.lineWidth = 4
+      ctx.moveTo(tankX, tank.y - 14) // Arm attaches to upper torso
+      ctx.lineTo(tankX + Math.cos(angleRad) * barrelLength * direction, tank.y - 14 - Math.sin(angleRad) * barrelLength)
+      ctx.strokeStyle = mechColor
+      ctx.lineWidth = 5 // Thicker arm for mech look
+      ctx.lineCap = "round"
       ctx.stroke()
 
+      // Draw arm joint (circle at shoulder)
+      ctx.fillStyle = mechColor
+      ctx.beginPath()
+      ctx.arc(tankX, tank.y - 14, 3, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.restore()
+
       const healthWidth = 30
-      const healthHeight = 4
-      ctx.fillStyle = "rgba(0, 0, 0, 0.4)"
-      ctx.fillRect(tankX - healthWidth / 2, tank.y - 20, healthWidth, healthHeight)
-      ctx.fillStyle = tank.health > 30 ? "#40c040" : "#c04040"
-      ctx.fillRect(tankX - healthWidth / 2, tank.y - 20, healthWidth * (tank.health / tank.maxHealth), healthHeight)
+      const healthHeight = 6
+      const healthY = tank.y + 16
+      const healthRadius = healthHeight / 2
+
+      // Draw background pill (dark with transparency)
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)"
+      ctx.beginPath()
+      ctx.arc(tankX - healthWidth / 2 + healthRadius, healthY, healthRadius, Math.PI / 2, (Math.PI * 3) / 2)
+      ctx.arc(tankX + healthWidth / 2 - healthRadius, healthY, healthRadius, (Math.PI * 3) / 2, Math.PI / 2)
+      ctx.closePath()
+      ctx.fill()
+
+      // Draw health fill pill (green or red based on health)
+      const currentHealthWidth = healthWidth * (tank.health / tank.maxHealth)
+      if (currentHealthWidth > 0) {
+        ctx.fillStyle = tank.health > 30 ? "#40c040" : "#c04040"
+        ctx.beginPath()
+        if (currentHealthWidth >= healthHeight) {
+          // Only draw rounded edges if wide enough
+          ctx.arc(tankX - healthWidth / 2 + healthRadius, healthY, healthRadius, Math.PI / 2, (Math.PI * 3) / 2)
+          ctx.arc(
+            tankX - healthWidth / 2 + currentHealthWidth - healthRadius,
+            healthY,
+            healthRadius,
+            (Math.PI * 3) / 2,
+            Math.PI / 2,
+          )
+        } else {
+          // For very small health amounts, just draw a circle
+          ctx.arc(tankX - healthWidth / 2 + healthRadius, healthY, healthRadius, 0, Math.PI * 2)
+        }
+        ctx.closePath()
+        ctx.fill()
+      }
 
       if (index === currentTankIndex && phase === "battle") {
         ctx.fillStyle = "#ffffff"

@@ -75,6 +75,7 @@ function createTank(id: string, name: string, x: number, terrain: number[], colo
     maxHealth: 50,
     money: 1000,
     color,
+    mechColor: color, // Use the color parameter instead of hardcoded green
     weapons: WEAPONS.map((w) => ({ ...w })),
     shields: 0,
     parachutes: 0,
@@ -87,6 +88,7 @@ interface GameStore extends GameState {
   initGame: () => void
   setPhase: (phase: GameState["phase"]) => void
   updateTank: (tankId: string, updates: Partial<Tank>) => void
+  setMechColor: (tankId: string, color: string) => void // Added setMechColor function
   nextTurn: () => void
   fireProjectile: () => void
   updateProjectile: () => boolean
@@ -132,10 +134,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const enemyOnLeft = Math.random() < 0.5
     const playerX = CANVAS_WIDTH / 2
-    const enemyX = enemyOnLeft ? 300 : CANVAS_WIDTH - 300 // Adjusted enemy spawn distance for larger map
+    const enemyX = enemyOnLeft ? 300 : CANVAS_WIDTH - 300
 
-    const tank1 = createTank("player", "You", playerX, terrain, "oklch(0.45 0.15 150)", false)
-    const tank2 = createTank("enemy", "Enemy", enemyX, terrain, "oklch(0.55 0.15 25)", true)
+    const state = get()
+    const existingPlayerTank = state.tanks.find((t) => t.id === "player")
+    const playerColor = existingPlayerTank?.mechColor || "oklch(0.45 0.15 150)" // Default to green
+
+    const availableColors = [
+      "oklch(0.45 0.15 150)", // Green
+      "oklch(0.55 0.20 250)", // Blue
+      "oklch(0.55 0.22 25)", // Red
+      "oklch(0.60 0.20 300)", // Purple
+      "oklch(0.65 0.18 60)", // Orange
+      "oklch(0.60 0.18 200)", // Cyan
+    ]
+
+    const enemyColor = availableColors.find((c) => c !== playerColor) || "oklch(0.55 0.22 25)"
+
+    const tank1 = createTank("player", "You", playerX, terrain, playerColor, false)
+    const tank2 = createTank("enemy", "Enemy", enemyX, terrain, enemyColor, true)
 
     set({
       phase: "buying",
@@ -160,6 +177,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   updateTank: (tankId, updates) =>
     set((state) => ({
       tanks: state.tanks.map((t) => (t.id === tankId ? { ...t, ...updates } : t)),
+    })),
+
+  setMechColor: (tankId, color) =>
+    set((state) => ({
+      tanks: state.tanks.map((t) => (t.id === tankId ? { ...t, mechColor: color } : t)),
     })),
 
   nextTurn: () =>

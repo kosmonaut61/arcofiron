@@ -43,7 +43,7 @@ export function MainMenu() {
       <div className="relative z-10 flex flex-col items-center justify-center px-8 py-12 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl">
         <div className="flex flex-col items-center gap-8">
           <div className="text-center space-y-2">
-            <h1 className="text-4xl font-medium tracking-widest text-white">arc of iron</h1>
+            <h1 className="text-4xl font-medium tracking-widest text-white">iron arc</h1>
             <p className="text-sm text-white/80 tracking-wide">artillery warfare</p>
           </div>
 

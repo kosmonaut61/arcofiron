@@ -9,6 +9,7 @@ export interface Tank {
   maxHealth: number
   money: number
   color: string
+  mechColor: string // Added mechColor property for player customization
   weapons: Weapon[]
   shields: number
   parachutes: number
